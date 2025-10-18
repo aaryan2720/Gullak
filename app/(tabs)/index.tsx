@@ -1,98 +1,384 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import Card from '@/components/ui/card';
+import ProgressBar from '@/components/ui/progress-bar';
+import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
+            <Text style={[styles.userName, { color: colors.text }]}>Rahul! 👋</Text>
+          </View>
+          <TouchableOpacity>
+            <Ionicons name="notifications-outline" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Portfolio Card */}
+        <View style={[styles.portfolioCard, { backgroundColor: colors.primary }]}>
+          <View style={styles.portfolioHeader}>
+            <Text style={[styles.portfolioLabel, { color: colors.textInverse }]}>
+              Total Portfolio Value
+            </Text>
+            <View style={styles.eyeIcon}>
+              <Ionicons name="eye-outline" size={20} color={colors.textInverse} />
+            </View>
+          </View>
+          <Text style={[styles.portfolioValue, { color: colors.textInverse }]}>₹5,250</Text>
+          <View style={styles.portfolioStats}>
+            <View style={styles.statItem}>
+              <Ionicons name="trending-up" size={16} color={colors.textInverse} />
+              <Text style={[styles.statText, { color: colors.textInverse }]}>
+                +₹250 (5.0%)
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Ionicons name="calendar-outline" size={16} color={colors.textInverse} />
+              <Text style={[styles.statText, { color: colors.textInverse }]}>This month</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.actionCard}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="add-circle-outline" size={28} color={colors.primary} />
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>Invest</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionCard}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
+                <Ionicons name="flag-outline" size={28} color={colors.secondary} />
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>New Goal</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionCard}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="repeat-outline" size={28} color={colors.success} />
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>Round-up</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionCard}>
+              <View style={[styles.actionIcon, { backgroundColor: colors.warning + '20' }]}>
+                <Ionicons name="chatbubble-outline" size={28} color={colors.warning} />
+              </View>
+              <Text style={[styles.actionLabel, { color: colors.text }]}>AI Coach</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Active Goals */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Active Goals</Text>
+            <TouchableOpacity>
+              <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Card style={styles.goalCard}>
+            <View style={styles.goalHeader}>
+              <View style={styles.goalIconContainer}>
+                <Text style={styles.goalEmoji}>📱</Text>
+              </View>
+              <View style={styles.flex}>
+                <Text style={[styles.goalTitle, { color: colors.text }]}>New iPhone</Text>
+                <Text style={[styles.goalAmount, { color: colors.textSecondary }]}>
+                  ₹15,000 / ₹30,000
+                </Text>
+              </View>
+            </View>
+            <ProgressBar progress={50} color={colors.goals.gadgets} style={styles.goalProgress} />
+            <View style={styles.goalFooter}>
+              <Text style={[styles.goalDays, { color: colors.textSecondary }]}>
+                45 days left
+              </Text>
+              <Text style={[styles.goalPercentage, { color: colors.goals.gadgets }]}>50%</Text>
+            </View>
+          </Card>
+        </View>
+
+        {/* Recent Activity */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Activity</Text>
+
+          <Card style={styles.activityCard}>
+            <View style={styles.activityRow}>
+              <View style={[styles.activityIcon, { backgroundColor: colors.success + '20' }]}>
+                <Ionicons name="arrow-up" size={20} color={colors.success} />
+              </View>
+              <View style={styles.flex}>
+                <Text style={[styles.activityTitle, { color: colors.text }]}>
+                  Round-up Investment
+                </Text>
+                <Text style={[styles.activityTime, { color: colors.textSecondary }]}>
+                  2 hours ago
+                </Text>
+              </View>
+              <Text style={[styles.activityAmount, { color: colors.success }]}>+₹10</Text>
+            </View>
+          </Card>
+
+          <Card style={styles.activityCard}>
+            <View style={styles.activityRow}>
+              <View style={[styles.activityIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Ionicons name="trophy" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.flex}>
+                <Text style={[styles.activityTitle, { color: colors.text }]}>
+                  Badge Earned: 15 Day Streak
+                </Text>
+                <Text style={[styles.activityTime, { color: colors.textSecondary }]}>
+                  1 day ago
+                </Text>
+              </View>
+            </View>
+          </Card>
+        </View>
+
+        {/* Learning Streak */}
+        <View style={styles.section}>
+          <View style={[styles.streakCard, { backgroundColor: '#FF6584' }]}>
+            <View style={styles.streakContent}>
+              <View>
+                <Text style={[styles.streakLabel, { color: colors.textInverse }]}>
+                  Learning Streak
+                </Text>
+                <View style={styles.streakRow}>
+                  <Ionicons name="flame" size={32} color={colors.textInverse} />
+                  <Text style={[styles.streakValue, { color: colors.textInverse }]}>15 Days</Text>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.continueButton}>
+                <Text style={[styles.continueText, { color: '#FF6584' }]}>Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+  },
+  greeting: {
+    fontSize: Typography.fontSize.sm,
+  },
+  userName: {
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+  },
+  portfolioCard: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+  },
+  portfolioHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  portfolioLabel: {
+    fontSize: Typography.fontSize.sm,
+    opacity: 0.9,
+  },
+  eyeIcon: {
+    padding: Spacing.xs,
+  },
+  portfolioValue: {
+    fontSize: Typography.fontSize['4xl'],
+    fontWeight: Typography.fontWeight.bold,
+    marginBottom: Spacing.md,
+  },
+  portfolioStats: {
+    flexDirection: 'row',
+    gap: Spacing.lg,
+  },
+  statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.xs,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  statText: {
+    fontSize: Typography.fontSize.sm,
+    opacity: 0.9,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  section: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  seeAll: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionCard: {
+    alignItems: 'center',
+    width: (width - Spacing.lg * 2 - Spacing.md * 3) / 4,
+  },
+  actionIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  actionLabel: {
+    fontSize: Typography.fontSize.xs,
+    textAlign: 'center',
+  },
+  goalCard: {
+    marginBottom: Spacing.md,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    marginBottom: Spacing.md,
+  },
+  goalIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  goalEmoji: {
+    fontSize: 24,
+  },
+  flex: {
+    flex: 1,
+  },
+  goalTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  goalAmount: {
+    fontSize: Typography.fontSize.sm,
+    marginTop: Spacing.xs / 2,
+  },
+  goalProgress: {
+    marginBottom: Spacing.sm,
+  },
+  goalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  goalDays: {
+    fontSize: Typography.fontSize.sm,
+  },
+  goalPercentage: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  activityCard: {
+    marginBottom: Spacing.sm,
+  },
+  activityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  activityIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.md,
+  },
+  activityTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  activityTime: {
+    fontSize: Typography.fontSize.xs,
+    marginTop: Spacing.xs / 2,
+  },
+  activityAmount: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  streakCard: {
+    paddingVertical: Spacing.xl,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+  },
+  streakContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  streakLabel: {
+    fontSize: Typography.fontSize.sm,
+    marginBottom: Spacing.xs,
+    opacity: 0.9,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  streakValue: {
+    fontSize: Typography.fontSize['2xl'],
+    fontWeight: Typography.fontWeight.bold,
+  },
+  continueButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.full,
+  },
+  continueText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
   },
 });
+
