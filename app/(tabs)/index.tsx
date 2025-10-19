@@ -3,6 +3,7 @@ import ProgressBar from '@/components/ui/progress-bar';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +13,7 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const router = useRouter();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -22,8 +24,13 @@ export default function HomeScreen() {
             <Text style={[styles.greeting, { color: colors.textSecondary }]}>Welcome back,</Text>
             <Text style={[styles.userName, { color: colors.text }]}>Rahul! 👋</Text>
           </View>
-          <TouchableOpacity>
-            <Ionicons name="notifications-outline" size={24} color={colors.text} />
+          <TouchableOpacity onPress={() => router.push('/notifications' as any)}>
+            <View style={styles.notificationIconWrapper}>
+              <Ionicons name="notifications-outline" size={24} color={colors.text} />
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>2</Text>
+              </View>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -56,28 +63,40 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Quick Actions</Text>
           <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.actionCard}>
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(tabs)/invest')}
+            >
               <View style={[styles.actionIcon, { backgroundColor: colors.primary + '20' }]}>
                 <Ionicons name="add-circle-outline" size={28} color={colors.primary} />
               </View>
               <Text style={[styles.actionLabel, { color: colors.text }]}>Invest</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard}>
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(tabs)/goals')}
+            >
               <View style={[styles.actionIcon, { backgroundColor: colors.secondary + '20' }]}>
                 <Ionicons name="flag-outline" size={28} color={colors.secondary} />
               </View>
               <Text style={[styles.actionLabel, { color: colors.text }]}>New Goal</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard}>
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(tabs)/invest')}
+            >
               <View style={[styles.actionIcon, { backgroundColor: colors.success + '20' }]}>
                 <Ionicons name="repeat-outline" size={28} color={colors.success} />
               </View>
               <Text style={[styles.actionLabel, { color: colors.text }]}>Round-up</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCard}>
+            <TouchableOpacity 
+              style={styles.actionCard}
+              onPress={() => router.push('/(tabs)/learn')}
+            >
               <View style={[styles.actionIcon, { backgroundColor: colors.warning + '20' }]}>
                 <Ionicons name="chatbubble-outline" size={28} color={colors.warning} />
               </View>
@@ -90,7 +109,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Active Goals</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/goals')}>
               <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -379,6 +398,26 @@ const styles = StyleSheet.create({
   continueText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semibold,
+  },
+  notificationIconWrapper: {
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF6584',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  notificationBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
 });
 
