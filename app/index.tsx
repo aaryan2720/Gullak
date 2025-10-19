@@ -101,8 +101,9 @@ export default function LandingPage() {
             end={{ x: 1, y: 1 }}
             style={styles.featuresBadgeGradient}
           >
-            <Ionicons name="sparkles" size={18} color="#FFFFFF" />
-            <Text style={styles.featuresBadgeText}>Features</Text>
+            <View style={styles.aiDot} />
+            <Text style={styles.featuresBadgeText}>AI Features</Text>
+            <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
           </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
@@ -138,15 +139,10 @@ export default function LandingPage() {
               />
             </Animated.View>
 
-            {/* Main Logo */}
+            {/* Main Logo - Gullak Pot */}
             <View style={styles.logoCircle}>
-              <LinearGradient
-                colors={['#FFFFFF', '#F8F6FF']}
-                style={styles.logoInner}
-              >
-                <Text style={styles.logoLetter}>G</Text>
-                <Ionicons name="trending-up-sharp" size={42} color="#5B54FF" style={styles.trendIcon} />
-              </LinearGradient>
+              <Text style={styles.gullakEmoji}>🪙</Text>
+              <Text style={styles.potEmoji}>🏺</Text>
             </View>
 
             {/* Sparkles */}
@@ -161,25 +157,16 @@ export default function LandingPage() {
             </View>
           </Animated.View>
 
-          {/* Brand Name */}
+          {/* Brand Name - Gullak */}
           <Animated.View style={[styles.brandContainer, { opacity: fadeAnim }]}>
-            <View style={styles.brandNameRow}>
-              <Text style={styles.brandGrow}>Grow</Text>
-              <LinearGradient
-                colors={['#FFD700', '#FFA500', '#FF8C00']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.zBox}
-              >
-                <Text style={styles.brandZ}>-Z</Text>
-              </LinearGradient>
-            </View>
+            <Text style={styles.brandName}>Gullak</Text>
+            <Text style={styles.tagline}>AI-Powered Micro-Investing</Text>
             
-            {/* Tagline */}
-            <View style={styles.taglineBadge}>
-              <Ionicons name="flash-sharp" size={14} color="#FFD700" />
-              <Text style={styles.tagline}>Micro-Investing for Gen-Z</Text>
-              <Ionicons name="flash-sharp" size={14} color="#FFD700" />
+            {/* AI Agent Badge */}
+            <View style={styles.aiBadge}>
+              <Ionicons name="sparkles" size={14} color="#FFD700" />
+              <Text style={styles.aiBadgeText}>Powered by Agentic AI</Text>
+              <Ionicons name="sparkles" size={14} color="#FFD700" />
             </View>
           </Animated.View>
 
@@ -205,21 +192,21 @@ export default function LandingPage() {
             <Text style={styles.heroSubtitle}>Watch your spare change grow into wealth</Text>
           </Animated.View>
 
-          {/* Trust Indicators - Minimal */}
+          {/* Trust Indicators with AI Highlight */}
           <Animated.View style={[styles.trustRow, { opacity: fadeAnim }]}>
             <View style={styles.trustItem}>
-              <Ionicons name="people-sharp" size={18} color="rgba(255, 255, 255, 0.9)" />
+              <Ionicons name="shield-checkmark" size={18} color="#FFD700" />
+              <Text style={styles.trustText}>SEBI Registered</Text>
+            </View>
+            <View style={styles.trustDivider} />
+            <View style={styles.trustItem}>
+              <Ionicons name="sparkles-outline" size={18} color="#FFD700" />
+              <Text style={styles.trustText}>AI Agent Active</Text>
+            </View>
+            <View style={styles.trustDivider} />
+            <View style={styles.trustItem}>
+              <Ionicons name="people" size={18} color="#FFD700" />
               <Text style={styles.trustText}>50K+ Users</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="star-sharp" size={18} color="#FFD700" />
-              <Text style={styles.trustText}>4.9 Rating</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="shield-checkmark-sharp" size={18} color="#4CAF50" />
-              <Text style={styles.trustText}>100% Safe</Text>
             </View>
           </Animated.View>
         </View>
@@ -233,13 +220,17 @@ export default function LandingPage() {
           onPress={() => router.push('/sign-up')}
         >
           <LinearGradient
-            colors={['#5B54FF', '#7B75FF']}
+            colors={['#FFD700', '#FFA500']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
-            style={styles.buttonGradient}
+            style={styles.primaryGradient}
           >
-            <Text style={styles.primaryButtonText}>Get Started - Free ₹100</Text>
-            <Ionicons name="arrow-forward-sharp" size={22} color="#FFFFFF" />
+            <View style={styles.aiAssistChip}>
+              <Ionicons name="chatbubble-ellipses" size={12} color="#FFD700" />
+              <Text style={styles.aiChipText}>AI Assists You</Text>
+            </View>
+            <Text style={styles.primaryButtonText}>Start with ₹300 Free 🪙</Text>
+            <Ionicons name="arrow-forward-sharp" size={22} color="#1A1A1A" />
           </LinearGradient>
         </TouchableOpacity>
 
@@ -281,11 +272,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
-    gap: 6,
+    gap: 8,
     borderRadius: 30,
   },
+  aiDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00FF00',
+    shadowColor: '#00FF00',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 6,
+  },
   featuresBadgeText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     color: '#FFFFFF',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
@@ -323,30 +324,29 @@ const styles = StyleSheet.create({
     borderRadius: 90,
   },
   logoCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 15,
-  },
-  logoInner: {
-    width: '100%',
-    height: '100%',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
+    position: 'relative',
   },
-  logoLetter: {
-    fontSize: 52,
-    fontWeight: '900',
-    color: '#5B54FF',
-    marginTop: -12,
+  gullakEmoji: {
+    fontSize: 45,
+    position: 'absolute',
+    top: 20,
+    right: 35,
   },
-  trendIcon: {
-    marginTop: -8,
+  potEmoji: {
+    fontSize: 70,
+    marginTop: 10,
   },
   sparkle1: {
     position: 'absolute',
@@ -364,60 +364,47 @@ const styles = StyleSheet.create({
     left: -5,
   },
   
-  // BRAND NAME
+  // BRAND NAME & AI BADGE
   brandContainer: {
     alignItems: 'center',
     marginBottom: 40,
   },
-  brandNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  brandGrow: {
-    fontSize: 56,
+  brandName: {
+    fontSize: 52,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 1,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 6,
-  },
-  zBox: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 14,
-    marginLeft: 6,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  brandZ: {
-    fontSize: 56,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: 1,
+    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 6,
-  },
-  taglineBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 30,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+    letterSpacing: 2,
   },
   tagline: {
-    fontSize: 14,
-    color: '#FFFFFF',
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '600',
+    marginBottom: 12,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  aiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    gap: 6,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.4)',
+  },
+  aiBadgeText: {
+    fontSize: 13,
     fontWeight: '700',
+    color: '#FFD700',
+    letterSpacing: 0.5,
   },
   
   // HERO MESSAGE
@@ -520,18 +507,33 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 10,
   },
-  buttonGradient: {
-    flexDirection: 'row',
+  primaryGradient: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
+    paddingVertical: 16,
     paddingHorizontal: 32,
-    gap: 12,
+    gap: 8,
+  },
+  aiAssistChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(26, 26, 26, 0.85)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    gap: 4,
+  },
+  aiChipText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFD700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   primaryButtonText: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
   },
   secondaryButton: {
     paddingVertical: 14,

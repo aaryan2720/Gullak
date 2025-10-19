@@ -34,48 +34,54 @@ export default function FeaturesScreen() {
       color: '#4CAF50',
       gradient: ['#E8F5E9', '#F1F8F4'],
       title: 'Auto Round-up',
-      description: 'Every purchase rounds up to nearest ₹10. Spare change automatically invested in diversified portfolios.',
-      benefits: ['Set & forget', 'Save effortlessly', 'Grow passively'],
+      description: 'AI Agent automatically rounds up every purchase to ₹10 and invests spare change in diversified portfolios.',
+      benefits: ['AI-powered automation', 'Save effortlessly', 'Grow passively'],
+      aiFeature: true,
     },
     {
       icon: 'trophy',
       color: '#FFA726',
       gradient: ['#FFF3E0', '#FFF8F0'],
       title: 'Goal-Based Investing',
-      description: 'Set financial goals and watch your progress. Whether it\'s a bike, vacation, or emergency fund - we\'ve got you covered.',
-      benefits: ['Track progress', 'Milestone rewards', 'Achieve faster'],
+      description: 'AI analyzes your spending and suggests personalized goals. Track progress for bike, vacation, or emergency fund.',
+      benefits: ['AI goal suggestions', 'Smart tracking', 'Achieve faster'],
+      aiFeature: true,
     },
     {
       icon: 'school',
       color: '#2196F3',
       gradient: ['#E3F2FD', '#F0F7FD'],
       title: 'Learn & Earn',
-      description: 'Gamified investing education like Duolingo! Complete lessons, take quizzes, earn XP, unlock badges, and get real rewards.',
-      benefits: ['Interactive lessons', 'Earn rewards', 'Build confidence'],
+      description: 'AI-driven gamified investing education! Complete lessons, quizzes, earn XP, unlock badges, and real rewards.',
+      benefits: ['AI personalized lessons', 'Earn rewards', 'Build confidence'],
+      aiFeature: true,
     },
     {
       icon: 'sparkles',
       color: '#9C27B0',
       gradient: ['#F3E5F5', '#F8F0FA'],
       title: 'AI Investment Coach',
-      description: '24/7 personal AI advisor powered by advanced algorithms. Get smart investment tips, budget guidance, and portfolio recommendations.',
-      benefits: ['Expert advice', 'Personalized tips', 'Always available'],
+      description: '24/7 Agentic AI advisor that learns from your behavior. Get real-time investment tips, budget guidance, and portfolio recommendations.',
+      benefits: ['Agentic AI brain', 'Learns your habits', 'Always available'],
+      aiFeature: true,
     },
     {
       icon: 'pie-chart',
       color: '#FF6584',
       gradient: ['#FFE8EC', '#FFF0F3'],
-      title: 'Diversified Portfolios',
-      description: 'Professionally managed portfolios with automatic rebalancing. Invest in mutual funds, stocks, and bonds based on your risk profile.',
-      benefits: ['Low risk', 'Auto-balanced', 'Professional'],
+      title: 'AI Portfolio Manager',
+      description: 'Agentic AI continuously monitors and rebalances your portfolio. Automatic diversification across mutual funds, stocks, and bonds.',
+      benefits: ['AI auto-rebalancing', 'Risk optimization', 'Professional grade'],
+      aiFeature: true,
     },
     {
       icon: 'shield-checkmark',
       color: '#00BCD4',
       gradient: ['#E0F7FA', '#F0FBFC'],
       title: 'Bank-Grade Security',
-      description: '256-bit encryption, SEBI compliant, and secure biometric authentication. Your money and data are completely safe.',
-      benefits: ['Encrypted', 'SEBI approved', 'Biometric login'],
+      description: 'AI-powered fraud detection with 256-bit encryption, SEBI compliance, and secure biometric authentication.',
+      benefits: ['AI fraud detection', 'SEBI approved', 'Biometric login'],
+      aiFeature: true,
     },
   ];
 
@@ -90,7 +96,10 @@ export default function FeaturesScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={26} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Features</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>AI Features</Text>
+          <View style={styles.aiStatusDot} />
+        </View>
         <View style={styles.headerSpacer} />
       </LinearGradient>
 
@@ -107,13 +116,14 @@ export default function FeaturesScreen() {
                 colors={feature.gradient as [string, string]}
                 style={styles.featureGradient}
               >
-                {/* Icon Header */}
+                {/* Icon Header with AI Badge */}
                 <View style={styles.featureHeader}>
                   <View style={[styles.iconCircle, { backgroundColor: feature.color + '30' }]}>
                     <Ionicons name={feature.icon as any} size={36} color={feature.color} />
                   </View>
-                  <View style={styles.numberBadge}>
-                    <Text style={styles.numberText}>{index + 1}</Text>
+                  <View style={styles.aiPoweredBadge}>
+                    <Ionicons name="sparkles" size={12} color="#FFD700" />
+                    <Text style={styles.aiPoweredText}>AI</Text>
                   </View>
                 </View>
 
@@ -226,7 +236,11 @@ export default function FeaturesScreen() {
             end={{ x: 1, y: 0 }}
             style={styles.ctaGradient}
           >
-            <Text style={styles.ctaText}>Get Started Now</Text>
+            <View style={styles.ctaAiBadge}>
+              <Ionicons name="flash" size={12} color="#FFD700" />
+              <Text style={styles.ctaAiText}>AI Ready</Text>
+            </View>
+            <Text style={styles.ctaText}>Start Your Gullak Journey</Text>
             <Ionicons name="arrow-forward-sharp" size={22} color="#FFFFFF" />
           </LinearGradient>
         </TouchableOpacity>
@@ -251,10 +265,25 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 4,
   },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+  aiStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00FF00',
+    shadowColor: '#00FF00',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 8,
   },
   headerSpacer: {
     width: 34,
@@ -312,18 +341,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  numberBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  aiPoweredBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: '#FFD700',
   },
-  numberText: {
-    fontSize: 16,
+  aiPoweredText: {
+    fontSize: 11,
     fontWeight: '900',
-    color: '#333',
+    color: '#FFD700',
+    letterSpacing: 1,
   },
   featureTitle: {
     fontSize: 24,
@@ -472,11 +505,26 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   ctaGradient: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    gap: 12,
+    paddingVertical: 16,
+    gap: 8,
+  },
+  ctaAiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    gap: 4,
+  },
+  ctaAiText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#FFD700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   ctaText: {
     fontSize: 17,
