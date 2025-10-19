@@ -5,6 +5,8 @@ import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   Dimensions,
+  Platform,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -16,231 +18,223 @@ const { width, height } = Dimensions.get('window');
 
 export default function LandingPage() {
   const router = useRouter();
+  
+  // Smooth, subtle animations
   const floatAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const learnMorePulse = useRef(new Animated.Value(1)).current;
+  const fadeInAnim = useRef(new Animated.Value(0)).current;
+  const slideUpAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
-    // Floating animation for logo
+    // Subtle floating animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, {
-          toValue: -12,
-          duration: 2500,
+          toValue: -8,
+          duration: 3000,
           useNativeDriver: true,
         }),
         Animated.timing(floatAnim, {
           toValue: 0,
-          duration: 2500,
+          duration: 3000,
           useNativeDriver: true,
         }),
       ])
     ).start();
 
-    // Pulse animation for glow
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Fade in animation for content
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      delay: 300,
-      useNativeDriver: true,
-    }).start();
-
-    // Pulsing animation for Learn More button
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(learnMorePulse, {
-          toValue: 1.05,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(learnMorePulse, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+    // Smooth fade in on load
+    Animated.parallel([
+      Animated.timing(fadeInAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideUpAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAFAFA" />
       
-      {/* Animated Features Badge - Top Left */}
-      <Animated.View 
-        style={[
-          styles.featuresBadge,
-          { transform: [{ scale: learnMorePulse }] }
-        ]}
-      >
-        <TouchableOpacity 
-          style={styles.featuresBadgeButton}
-          onPress={() => router.push('/features' as any)}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={['#FFD700', '#FFA500']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.featuresBadgeGradient}
-          >
-            <View style={styles.aiDot} />
-            <Text style={styles.featuresBadgeText}>AI Features</Text>
-            <Ionicons name="chevron-forward" size={16} color="#FFFFFF" />
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
-      
-      {/* HERO SECTION - 80% of screen */}
+      {/* Modern Gradient Background - Subtle */}
       <LinearGradient
-        colors={['#5B54FF', '#7B75FF', '#9D8FFF', '#FF6B9D']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.heroSection}
+        colors={['#FAFAFA', '#F5F5FF', '#FFF5FA']}
+        style={styles.backgroundGradient}
       >
-        <View style={styles.heroContent}>
-          {/* Animated Logo - Large & Centered */}
-          <Animated.View 
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* AI Agent Badge - Top Right (Clean Position) */}
+          <Animated.View
             style={[
-              styles.logoContainer,
-              { 
-                transform: [{ translateY: floatAnim }],
-                opacity: fadeAnim,
-              }
+              styles.agentBadge,
+              {
+                opacity: fadeInAnim,
+                transform: [{ translateY: slideUpAnim }],
+              },
             ]}
           >
-            {/* Outer Glow */}
-            <Animated.View 
+            <TouchableOpacity
+              style={styles.agentButton}
+              activeOpacity={0.7}
+              onPress={() => router.push('/features' as any)}
+            >
+              <View style={styles.agentDot} />
+              <Text style={styles.agentText}>AI Agent</Text>
+              <Ionicons name="sparkles" size={14} color="#6C63FF" />
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Hero Section - Safe Area Aware */}
+          <Animated.View
+            style={[
+              styles.heroSection,
+              {
+                opacity: fadeInAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            {/* Brand Logo - Centered, Clean */}
+            <Animated.View
               style={[
-                styles.logoGlow,
-                { transform: [{ scale: pulseAnim }] }
+                styles.logoContainer,
+                { transform: [{ translateY: floatAnim }] },
               ]}
             >
-              <LinearGradient
-                colors={['rgba(255, 215, 0, 0.6)', 'rgba(255, 165, 0, 0.3)', 'transparent']}
-                style={styles.glowGradient}
-              />
+              <View style={styles.logoWrapper}>
+                <View style={styles.coinContainer}>
+                  <Text style={styles.coinEmoji}>🪙</Text>
+                </View>
+              </View>
             </Animated.View>
 
-            {/* Main Logo - Gullak Pot */}
-            <View style={styles.logoCircle}>
-              <Text style={styles.gullakEmoji}>🪙</Text>
-              <Text style={styles.potEmoji}>🏺</Text>
+            {/* Brand Name */}
+            <View style={styles.brandSection}>
+              <Text style={styles.brandName}>Gullak</Text>
+              <Text style={styles.tagline}>Smart Micro-Investing</Text>
             </View>
 
-            {/* Sparkles */}
-            <View style={styles.sparkle1}>
-              <Ionicons name="sparkles-sharp" size={20} color="#FFD700" />
+            {/* Hero Headline */}
+            <View style={styles.headlineSection}>
+              <Text style={styles.headline}>Grow Your Wealth</Text>
+              <Text style={styles.subheadline}>Starting with just</Text>
+              
+              <View style={styles.amountContainer}>
+                <LinearGradient
+                  colors={['#6C63FF', '#8F88FF']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.amountBadge}
+                >
+                  <Text style={styles.amountSymbol}>₹</Text>
+                  <Text style={styles.amountValue}>10</Text>
+                </LinearGradient>
+              </View>
+
+              <Text style={styles.description}>
+                Your AI-powered investment companion that turns spare change into wealth
+              </Text>
             </View>
-            <View style={styles.sparkle2}>
-              <Ionicons name="sparkles" size={16} color="#FFA500" />
-            </View>
-            <View style={styles.sparkle3}>
-              <Ionicons name="star" size={14} color="#FFD700" />
+
+            {/* Features Grid */}
+            <View style={styles.featuresGrid}>
+              <View style={styles.featureItem}>
+                <View style={[styles.featureIcon, { backgroundColor: '#E8F5E9' }]}>
+                  <Ionicons name="trending-up" size={20} color="#4CAF50" />
+                </View>
+                <Text style={styles.featureText}>Auto-Invest</Text>
+              </View>
+              
+              <View style={styles.featureItem}>
+                <View style={[styles.featureIcon, { backgroundColor: '#E3F2FD' }]}>
+                  <Ionicons name="shield-checkmark" size={20} color="#2196F3" />
+                </View>
+                <Text style={styles.featureText}>SEBI Safe</Text>
+              </View>
+              
+              <View style={styles.featureItem}>
+                <View style={[styles.featureIcon, { backgroundColor: '#F3E5F5' }]}>
+                  <Ionicons name="sparkles" size={20} color="#9C27B0" />
+                </View>
+                <Text style={styles.featureText}>AI Guided</Text>
+              </View>
             </View>
           </Animated.View>
 
-          {/* Brand Name - Gullak */}
-          <Animated.View style={[styles.brandContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.brandName}>Gullak</Text>
-            <Text style={styles.tagline}>AI-Powered Micro-Investing</Text>
-            
-            {/* AI Agent Badge */}
-            <View style={styles.aiBadge}>
-              <Ionicons name="sparkles" size={14} color="#FFD700" />
-              <Text style={styles.aiBadgeText}>Powered by Agentic AI</Text>
-              <Ionicons name="sparkles" size={14} color="#FFD700" />
+          {/* Trust Bar - Fixed to Bottom of Content */}
+          <View style={styles.trustBar}>
+            <View style={styles.trustItemContainer}>
+              <Ionicons name="shield-checkmark-outline" size={16} color="#6C63FF" />
+              <Text style={styles.trustLabel}>SEBI Registered</Text>
             </View>
-          </Animated.View>
+            <View style={styles.trustDivider} />
+            <View style={styles.trustItemContainer}>
+              <Ionicons name="people-outline" size={16} color="#6C63FF" />
+              <Text style={styles.trustLabel}>50K+ Users</Text>
+            </View>
+            <View style={styles.trustDivider} />
+            <View style={styles.trustItemContainer}>
+              <Ionicons name="lock-closed-outline" size={16} color="#6C63FF" />
+              <Text style={styles.trustLabel}>Bank-Grade Security</Text>
+            </View>
+          </View>
 
-          {/* Hero Message */}
-          <Animated.View 
+          {/* CTA Buttons */}
+          <Animated.View
             style={[
-              styles.heroMessageBox,
-              { opacity: fadeAnim }
+              styles.ctaSection,
+              {
+                opacity: fadeInAnim,
+                transform: [{ translateY: slideUpAnim }],
+              },
             ]}
           >
-            <Text style={styles.heroTitle}>Start Investing With</Text>
-            <View style={styles.amountRow}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              activeOpacity={0.8}
+              onPress={() => router.push('/sign-up')}
+            >
               <LinearGradient
-                colors={['#FFD700', '#FFA500']}
+                colors={['#6C63FF', '#8F88FF']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.amountBadge}
+                style={styles.primaryButtonGradient}
               >
-                <Text style={styles.amountText}>Just ₹10</Text>
+                <View style={styles.buttonContent}>
+                  <Text style={styles.primaryButtonText}>Get Started Free</Text>
+                  <View style={styles.bonusBadge}>
+                    <Text style={styles.bonusText}>₹300 Bonus 🎉</Text>
+                  </View>
+                </View>
+                <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
               </LinearGradient>
-              <Ionicons name="rocket-sharp" size={32} color="#FFD700" />
-            </View>
-            <Text style={styles.heroSubtitle}>Watch your spare change grow into wealth</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              activeOpacity={0.7}
+              onPress={() => router.push('/sign-in')}
+            >
+              <Text style={styles.secondaryButtonText}>Already have an account?</Text>
+              <Text style={styles.signInLink}>Sign In →</Text>
+            </TouchableOpacity>
           </Animated.View>
 
-          {/* Trust Indicators with AI Highlight */}
-          <Animated.View style={[styles.trustRow, { opacity: fadeAnim }]}>
-            <View style={styles.trustItem}>
-              <Ionicons name="shield-checkmark" size={18} color="#FFD700" />
-              <Text style={styles.trustText}>SEBI Registered</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="sparkles-outline" size={18} color="#FFD700" />
-              <Text style={styles.trustText}>AI Agent Active</Text>
-            </View>
-            <View style={styles.trustDivider} />
-            <View style={styles.trustItem}>
-              <Ionicons name="people" size={18} color="#FFD700" />
-              <Text style={styles.trustText}>50K+ Users</Text>
-            </View>
-          </Animated.View>
-        </View>
+          <View style={{ height: 40 }} />
+        </ScrollView>
       </LinearGradient>
-
-      {/* FIXED CTA BUTTONS - 20% */}
-      <View style={styles.ctaContainer}>
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          activeOpacity={0.85}
-          onPress={() => router.push('/sign-up')}
-        >
-          <LinearGradient
-            colors={['#FFD700', '#FFA500']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.primaryGradient}
-          >
-            <View style={styles.aiAssistChip}>
-              <Ionicons name="chatbubble-ellipses" size={12} color="#FFD700" />
-              <Text style={styles.aiChipText}>AI Assists You</Text>
-            </View>
-            <Text style={styles.primaryButtonText}>Start with ₹300 Free 🪙</Text>
-            <Ionicons name="arrow-forward-sharp" size={22} color="#1A1A1A" />
-          </LinearGradient>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.secondaryButton}
-          onPress={() => router.push('/sign-in')}
-        >
-          <Text style={styles.secondaryButtonText}>Already have an account? Sign In</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -248,300 +242,274 @@ export default function LandingPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAFAFA',
+  },
+  backgroundGradient: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   
-  // ANIMATED FEATURES BADGE (Top-Left)
-  featuresBadge: {
+  // AI Agent Badge - Top Right (Clean, Modern)
+  agentBadge: {
     position: 'absolute',
-    top: 50,
-    left: 20,
+    top: Platform.OS === 'ios' ? 60 : 50,
+    right: 20,
     zIndex: 100,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 10,
   },
-  featuresBadgeButton: {
-    borderRadius: 30,
-    overflow: 'hidden',
-  },
-  featuresBadgeGradient: {
+  agentButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    gap: 8,
-    borderRadius: 30,
+    gap: 6,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
-  aiDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#00FF00',
-    shadowColor: '#00FF00',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 6,
+  agentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#4CAF50',
   },
-  featuresBadgeText: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+  agentText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1A1A1A',
   },
   
-  // HERO SECTION (80%)
+  // Hero Section - Clean, Modern Layout
   heroSection: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  heroContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    paddingHorizontal: 24,
+    paddingTop: 40,
   },
   
-  // ANIMATED LOGO
+  // Logo - Clean and Minimal
   logoContainer: {
+    marginBottom: 24,
+  },
+  logoWrapper: {
+    alignItems: 'center',
+  },
+  coinContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  coinEmoji: {
+    fontSize: 64,
+  },
+  
+  // Brand Section
+  brandSection: {
     alignItems: 'center',
     marginBottom: 32,
   },
-  logoGlow: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-  },
-  glowGradient: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 90,
-  },
-  logoCircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
-    position: 'relative',
-  },
-  gullakEmoji: {
-    fontSize: 45,
-    position: 'absolute',
-    top: 20,
-    right: 35,
-  },
-  potEmoji: {
-    fontSize: 70,
-    marginTop: 10,
-  },
-  sparkle1: {
-    position: 'absolute',
-    top: -10,
-    right: 5,
-  },
-  sparkle2: {
-    position: 'absolute',
-    bottom: -5,
-    right: -10,
-  },
-  sparkle3: {
-    position: 'absolute',
-    top: 10,
-    left: -5,
-  },
-  
-  // BRAND NAME & AI BADGE
-  brandContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
   brandName: {
-    fontSize: 52,
+    fontSize: 48,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1A1A1A',
     marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    letterSpacing: 2,
+    letterSpacing: -1,
   },
   tagline: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#666',
     fontWeight: '600',
-    marginBottom: 12,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
   },
-  aiBadge: {
-    flexDirection: 'row',
+
+  // Headline Section
+  headlineSection: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    gap: 6,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.4)',
+    marginBottom: 32,
+    paddingHorizontal: 20,
   },
-  aiBadgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#FFD700',
-    letterSpacing: 0.5,
-  },
-  
-  // HERO MESSAGE
-  heroMessageBox: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  heroTitle: {
-    fontSize: 28,
+  headline: {
+    fontSize: 36,
     fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 16,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
-  amountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+  subheadline: {
+    fontSize: 18,
+    color: '#666',
+    fontWeight: '500',
     marginBottom: 16,
+  },
+  amountContainer: {
+    marginBottom: 20,
   },
   amountBadge: {
-    paddingHorizontal: 28,
-    paddingVertical: 12,
-    borderRadius: 20,
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 15,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  amountText: {
-    fontSize: 38,
+  amountSymbol: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginRight: 4,
+  },
+  amountValue: {
+    fontSize: 56,
     fontWeight: '900',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
-  heroSubtitle: {
+  description: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.95)',
+    color: '#666',
     textAlign: 'center',
-    fontWeight: '600',
     lineHeight: 24,
     paddingHorizontal: 20,
   },
-  
-  // TRUST ROW
-  trustRow: {
+
+  // Features Grid
+  featuresGrid: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 32,
+    paddingHorizontal: 20,
+  },
+  featureItem: {
+    alignItems: 'center',
+    flex: 1,
+    maxWidth: 100,
+  },
+  featureIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  featureText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    textAlign: 'center',
+  },
+
+  // Trust Bar
+  trustBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginTop: 40,
+    marginBottom: 32,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  trustItem: {
+  trustItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    flex: 1,
+    justifyContent: 'center',
   },
-  trustText: {
-    fontSize: 13,
-    color: '#FFFFFF',
+  trustLabel: {
+    fontSize: 11,
     fontWeight: '700',
+    color: '#1A1A1A',
   },
   trustDivider: {
     width: 1,
-    height: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    height: 20,
+    backgroundColor: '#E0E0E0',
   },
-  
-  // FIXED CTA (20%)
-  ctaContainer: {
-    backgroundColor: '#FFFFFF',
+
+  // CTA Section
+  ctaSection: {
     paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 15,
+    paddingTop: 8,
   },
   primaryButton: {
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 14,
-    shadowColor: '#5B54FF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
+    marginBottom: 16,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
     shadowRadius: 16,
-    elevation: 10,
+    elevation: 8,
   },
-  primaryGradient: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    gap: 8,
-  },
-  aiAssistChip: {
+  primaryButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 26, 0.85)',
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    gap: 4,
+    justifyContent: 'space-between',
+    paddingVertical: 18,
+    paddingHorizontal: 24,
   },
-  aiChipText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#FFD700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  buttonContent: {
+    flex: 1,
   },
   primaryButtonText: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
-    color: '#1A1A1A',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  bonusBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  bonusText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   secondaryButton: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   secondaryButtonText: {
     fontSize: 14,
-    color: '#5B54FF',
+    color: '#666',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  signInLink: {
+    fontSize: 16,
+    color: '#6C63FF',
     fontWeight: '700',
   },
 });

@@ -105,7 +105,9 @@ export default function SignInPage() {
           {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
+            <View>
+              <Text style={styles.dividerText}>OR</Text>
+            </View>
             <View style={styles.divider} />
           </View>
 
@@ -122,7 +124,7 @@ export default function SignInPage() {
 
           {/* Sign Up Link */}
           <View style={styles.signUpContainer}>
-            <Text style={styles.signUpText}>Don't have an account? </Text>
+            <Text style={styles.signUpText}>Don't have an account?{' '}</Text>
             <TouchableOpacity onPress={() => router.push('sign-up' as any)}>
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
@@ -130,10 +132,7 @@ export default function SignInPage() {
 
           {/* Terms */}
           <Text style={styles.termsText}>
-            By signing in, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text>
-            {' '}and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>
+            By signing in, you agree to our <Text style={styles.termsLink}>Terms of Service</Text> and <Text style={styles.termsLink}>Privacy Policy</Text>
           </Text>
         </View>
       </ScrollView>

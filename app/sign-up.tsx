@@ -1,6 +1,7 @@
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Colors, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -19,6 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -95,7 +98,7 @@ export default function SignUpPage() {
               placeholder="John Doe"
               value={name}
               onChangeText={setName}
-              leftIcon="person-outline"
+              leftIcon={<Ionicons name="person-outline" size={20} color={colors.textSecondary} />}
             />
 
             <Input
@@ -103,7 +106,7 @@ export default function SignUpPage() {
               placeholder="your.email@example.com"
               value={email}
               onChangeText={setEmail}
-              leftIcon="mail-outline"
+              leftIcon={<Ionicons name="mail-outline" size={20} color={colors.textSecondary} />}
               keyboardType="email-address"
             />
 
@@ -112,7 +115,7 @@ export default function SignUpPage() {
               placeholder="+91 98765 43210"
               value={phone}
               onChangeText={setPhone}
-              leftIcon="call-outline"
+              leftIcon={<Ionicons name="call-outline" size={20} color={colors.textSecondary} />}
               keyboardType="phone-pad"
             />
 
@@ -121,7 +124,7 @@ export default function SignUpPage() {
               placeholder="Create a strong password"
               value={password}
               onChangeText={setPassword}
-              leftIcon="lock-closed-outline"
+              leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />}
               secureTextEntry
             />
 
@@ -130,7 +133,7 @@ export default function SignUpPage() {
               placeholder="Re-enter your password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              leftIcon="lock-closed-outline"
+              leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />}
               secureTextEntry
             />
           </View>

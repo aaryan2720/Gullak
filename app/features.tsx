@@ -2,8 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import {
+    Animated,
     Dimensions,
     Platform,
     ScrollView,
@@ -21,12 +22,92 @@ export default function FeaturesScreen() {
   const router = useRouter();
   const navigation = useNavigation();
 
+  // Animation values for agent workflow
+  const step1Anim = useRef(new Animated.Value(0)).current;
+  const step2Anim = useRef(new Animated.Value(0)).current;
+  const step3Anim = useRef(new Animated.Value(0)).current;
+  const step4Anim = useRef(new Animated.Value(0)).current;
+  const arrowAnim = useRef(new Animated.Value(0)).current;
+  const agentPulse = useRef(new Animated.Value(1)).current;
+
   // Hide the default header
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
+
+  // Agent workflow animation sequence
+  useEffect(() => {
+    // Agent pulsing continuously
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(agentPulse, {
+          toValue: 1.1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(agentPulse, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+
+    // Workflow animation sequence
+    const workflowSequence = Animated.sequence([
+      // Step 1: Observe
+      Animated.timing(step1Anim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.delay(600),
+      
+      // Arrow 1
+      Animated.timing(arrowAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      
+      // Step 2: Analyze
+      Animated.timing(step2Anim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.delay(600),
+      
+      // Step 3: Decide
+      Animated.timing(step3Anim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.delay(600),
+      
+      // Step 4: Execute
+      Animated.timing(step4Anim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.delay(1500),
+      
+      // Reset
+      Animated.parallel([
+        Animated.timing(step1Anim, { toValue: 0, duration: 0, useNativeDriver: true }),
+        Animated.timing(step2Anim, { toValue: 0, duration: 0, useNativeDriver: true }),
+        Animated.timing(step3Anim, { toValue: 0, duration: 0, useNativeDriver: true }),
+        Animated.timing(step4Anim, { toValue: 0, duration: 0, useNativeDriver: true }),
+        Animated.timing(arrowAnim, { toValue: 0, duration: 0, useNativeDriver: true }),
+      ]),
+    ]);
+
+    Animated.loop(workflowSequence).start();
+  }, []);
 
   const features = [
     {
@@ -97,8 +178,8 @@ export default function FeaturesScreen() {
           <Ionicons name="arrow-back" size={26} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerTitle}>AI Features</Text>
-          <View style={styles.aiStatusDot} />
+        <Text style={styles.headerTitle}>Agent Workflow</Text>
+        <View style={styles.aiStatusDot} />
         </View>
         <View style={styles.headerSpacer} />
       </LinearGradient>
@@ -108,6 +189,150 @@ export default function FeaturesScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Agent Workflow Diagram */}
+        <View style={styles.agentWorkflowSection}>
+          <Text style={styles.workflowTitle}>How Our Agent Works</Text>
+          <Text style={styles.workflowSubtitle}>Autonomous AI working 24/7 for you</Text>
+          
+          <View style={styles.workflowContainer}>
+            {/* Central Agent */}
+            <Animated.View 
+              style={[
+                styles.centralAgent,
+                { transform: [{ scale: agentPulse }] }
+              ]}
+            >
+              <LinearGradient
+                colors={['#FFD700', '#FFA500']}
+                style={styles.agentCircle}
+              >
+                <Text style={styles.agentEmoji}>🤖</Text>
+              </LinearGradient>
+              <Text style={styles.agentLabel}>AI Agent</Text>
+            </Animated.View>
+
+            {/* Workflow Steps */}
+            <View style={styles.workflowSteps}>
+              {/* Step 1: Observe */}
+              <Animated.View 
+                style={[
+                  styles.workflowStep,
+                  {
+                    opacity: step1Anim,
+                    transform: [{
+                      translateY: step1Anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                <View style={[styles.stepIcon, { backgroundColor: '#E3F2FD' }]}>
+                  <Ionicons name="eye" size={24} color="#2196F3" />
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>1. Observe</Text>
+                  <Text style={styles.stepDesc}>Monitors your transactions & spending</Text>
+                </View>
+              </Animated.View>
+
+              {/* Arrow */}
+              <Animated.View style={[styles.arrowContainer, { opacity: arrowAnim }]}>
+                <Ionicons name="arrow-down" size={24} color="#FFD700" />
+              </Animated.View>
+
+              {/* Step 2: Analyze */}
+              <Animated.View 
+                style={[
+                  styles.workflowStep,
+                  {
+                    opacity: step2Anim,
+                    transform: [{
+                      translateY: step2Anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                <View style={[styles.stepIcon, { backgroundColor: '#F3E5F5' }]}>
+                  <Ionicons name="analytics" size={24} color="#9C27B0" />
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>2. Analyze</Text>
+                  <Text style={styles.stepDesc}>AI processes patterns & data</Text>
+                </View>
+              </Animated.View>
+
+              {/* Arrow */}
+              <Animated.View style={[styles.arrowContainer, { opacity: arrowAnim }]}>
+                <Ionicons name="arrow-down" size={24} color="#FFD700" />
+              </Animated.View>
+
+              {/* Step 3: Decide */}
+              <Animated.View 
+                style={[
+                  styles.workflowStep,
+                  {
+                    opacity: step3Anim,
+                    transform: [{
+                      translateY: step3Anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                <View style={[styles.stepIcon, { backgroundColor: '#FFF3E0' }]}>
+                  <Ionicons name="bulb" size={24} color="#FFA726" />
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>3. Decide</Text>
+                  <Text style={styles.stepDesc}>Determines optimal action</Text>
+                </View>
+              </Animated.View>
+
+              {/* Arrow */}
+              <Animated.View style={[styles.arrowContainer, { opacity: arrowAnim }]}>
+                <Ionicons name="arrow-down" size={24} color="#FFD700" />
+              </Animated.View>
+
+              {/* Step 4: Execute */}
+              <Animated.View 
+                style={[
+                  styles.workflowStep,
+                  {
+                    opacity: step4Anim,
+                    transform: [{
+                      translateY: step4Anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      })
+                    }]
+                  }
+                ]}
+              >
+                <View style={[styles.stepIcon, { backgroundColor: '#E8F5E9' }]}>
+                  <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+                </View>
+                <View style={styles.stepContent}>
+                  <Text style={styles.stepTitle}>4. Execute</Text>
+                  <Text style={styles.stepDesc}>Automatically invests your money</Text>
+                </View>
+              </Animated.View>
+
+              {/* Loop indicator */}
+              <View style={styles.loopIndicator}>
+                <Ionicons name="refresh" size={20} color="#FFD700" />
+                <Text style={styles.loopText}>Repeats Continuously</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
         {/* Features List */}
         <View style={styles.featuresContainer}>
           {features.map((feature, index) => (
@@ -254,6 +479,117 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
+  
+  // AGENT WORKFLOW SECTION
+  agentWorkflowSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 24,
+  },
+  workflowTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  workflowSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    fontWeight: '600',
+  },
+  workflowContainer: {
+    alignItems: 'center',
+  },
+  centralAgent: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  agentCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  agentEmoji: {
+    fontSize: 50,
+  },
+  agentLabel: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginTop: 12,
+  },
+  workflowSteps: {
+    width: '100%',
+  },
+  workflowStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: '#F0F0F0',
+  },
+  stepIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  stepContent: {
+    flex: 1,
+  },
+  stepTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  stepDesc: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  arrowContainer: {
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  loopIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    borderRadius: 20,
+    gap: 8,
+  },
+  loopText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFD700',
+  },
+  
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -421,15 +757,6 @@ const styles = StyleSheet.create({
   stepNumber: {
     fontSize: 24,
     fontWeight: '900',
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1A1A1A',
-    marginBottom: 4,
   },
   stepDescription: {
     fontSize: 14,

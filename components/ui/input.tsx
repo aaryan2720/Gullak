@@ -23,8 +23,8 @@ interface InputProps {
   multiline?: boolean;
   numberOfLines?: number;
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+  leftIcon?: string | React.ReactNode;
+  rightIcon?: string | React.ReactNode;
   style?: ViewStyle;
   inputStyle?: TextStyle;
 }
@@ -64,7 +64,15 @@ export default function Input({
           disabled && styles.disabled,
         ]}
       >
-        {leftIcon && <View style={styles.leftIconContainer}>{leftIcon}</View>}
+        {leftIcon && (
+          <View style={styles.leftIconContainer}>
+            {typeof leftIcon === 'string' ? (
+              <Ionicons name={leftIcon as any} size={20} color={colors.textSecondary} />
+            ) : (
+              leftIcon
+            )}
+          </View>
+        )}
         <TextInput
           style={[
             styles.input,
@@ -101,7 +109,13 @@ export default function Input({
           </TouchableOpacity>
         )}
         {rightIcon && !secureTextEntry && (
-          <View style={styles.rightIconContainer}>{rightIcon}</View>
+          <View style={styles.rightIconContainer}>
+            {typeof rightIcon === 'string' ? (
+              <Ionicons name={rightIcon as any} size={20} color={colors.textSecondary} />
+            ) : (
+              rightIcon
+            )}
+          </View>
         )}
       </View>
       {error && <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text>}
