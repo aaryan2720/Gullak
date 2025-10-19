@@ -1,8 +1,8 @@
-# 💜 Grow-Z - Micro-Investing App for Gen-Z
+# 💜 Gullak - Micro-Investing App for Gen-Z
 
 > **"Pocket-sized Investing for Gen Z"**
 
-Grow-Z is a revolutionary micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like complexity, limited funds, and lack of knowledge.
+Gullak is a revolutionary micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like complexity, limited funds, and lack of knowledge.
 
 ---
 
@@ -160,7 +160,7 @@ Error:     #F44336 (Red)
 
 ## 🤖 AI Agents (Agentic AI)
 
-Grow-Z uses autonomous AI agents:
+Gullak uses autonomous AI agents:
 
 | Agent | Role | Function |
 |-------|------|----------|
@@ -272,7 +272,7 @@ For questions about:
 
 ## 📄 License
 
-All rights reserved. © 2025 Grow-Z
+All rights reserved. © 2025 Gullak
 
 ---
 
