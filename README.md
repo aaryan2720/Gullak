@@ -1,8 +1,12 @@
-# 💜 Gullak - Micro-Investing App for Gen-Z
+# 🏺 Gullak - AI & Blockchain Micro-Investing App for Gen-Z
 
-> **"Pocket-sized Investing for Gen Z"**
+> **"Pocket-sized Investing for Gen Z — Powered by AI & Blockchain"**
 
-Gullak is a revolutionary micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like complexity, limited funds, and lack of knowledge.
+Gullak is a revolutionary micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like complexity, limited funds, and lack of knowledge. Every transaction is backed by **autonomous AI agents** and recorded on an **immutable blockchain ledger** — making wealth creation transparent, automated, and accessible from just ₹10.
+
+[![Built on Polygon](https://img.shields.io/badge/Blockchain-Polygon-8247E5?style=for-the-badge)](https://polygon.technology)
+[![Powered by LangChain](https://img.shields.io/badge/AI-LangChain-00A67E?style=for-the-badge)](https://langchain.com)
+[![React Native](https://img.shields.io/badge/Mobile-React%20Native-61DAFB?style=for-the-badge)](https://reactnative.dev)
 
 ---
 
@@ -141,20 +145,71 @@ Error:     #F44336 (Red)
 
 ## 🏗️ Tech Stack
 
-### Frontend (Implemented)
+### Frontend (Implemented ✅)
 - **Framework:** React Native (Expo)
 - **Language:** TypeScript
 - **Navigation:** Expo Router
 - **UI:** Custom component library
 - **Icons:** Ionicons
 
-### Backend (Documented, To Implement)
+### Backend (Documented, To Implement 📝)
 - **Server:** Node.js + Express
 - **Database:** MongoDB + Redis
 - **AI:** Python (FastAPI) + LangGraph
 - **Payments:** Razorpay
 - **Investment APIs:** Groww, Zerodha
 - **Auth:** JWT + OAuth 2.0
+
+### 🔗 Blockchain (New — To Implement)
+- **Network:** Polygon (PoS) — Low gas, EVM-compatible
+- **Contracts:** Solidity + OpenZeppelin
+- **Wallet:** Privy.io (embedded) + WalletConnect
+- **Oracle:** Chainlink (price feeds)
+- **Storage:** IPFS (NFT metadata, lesson content)
+- **SDK:** ethers.js + wagmi
+- **Dev Tools:** Hardhat, The Graph
+
+---
+
+## 🔗 Blockchain Integration
+
+Gullak integrates blockchain to deliver **transparency, trust, and decentralized finance** capabilities that no traditional fintech app offers.
+
+### Why Blockchain?
+
+| Problem | Blockchain Solution |
+|---------|--------------------|
+| Lack of investment transparency | Immutable on-chain ledger |
+| Trust in AI decisions | AI actions logged & verifiable |
+| Goal fund temptation | Smart contract-locked funds |
+| Achievement verification | NFT-backed badges (truly owned) |
+
+### Smart Contract Suite
+
+#### 📒 `GullakLedger.sol` — Investment Record
+Every round-up and manual investment is recorded on the **Polygon blockchain** — users can independently verify their full investment history at any time.
+
+#### 🎯 `GullakGoal.sol` — Smart Contract Goals
+Goal funds are held in **smart contract escrow** and released only when the target amount is reached. This prevents impulsive withdrawals and builds financial discipline.
+
+#### 🏆 `GullakRewards.sol` — NFT Achievement Badges
+Milestone badges (First Investment, Goal Crusher, 30-Day Streak) are minted as **ERC-1155 NFTs** — stored in the user's wallet and truly owned by them.
+
+#### 🤖 `GullakAIAudit.sol` — AI Transparency
+Every significant AI agent action (investment, rebalancing, fraud block) is logged on-chain with a reasoning hash — ensuring AI accountability and supporting SEBI audit requirements.
+
+### DeFi Yield (Phase 2)
+Idle investment wallet balance earns **4–6% APY** through Aave/Compound integration. The AI Portfolio Manager agent automatically optimizes yield strategy.
+
+### Blockchain UX Philosophy
+> Blockchain is **invisible by default**. Users don't need to understand it — they just benefit from it.
+
+- Wallets created automatically on signup (Privy.io embedded wallet)
+- Gas fees abstracted via ERC-4337 account abstraction
+- All activity visible in a simple **"Transparency" tab** in the app
+- Advanced users can connect MetaMask or any WalletConnect wallet
+
+**→ Full blockchain specs in [BACKEND-REQUIREMENTS.md](./BACKEND-REQUIREMENTS.md)**
 
 ---
 
@@ -213,45 +268,55 @@ Gullak uses autonomous AI agents:
 ### ✅ Phase 1: MVP UI (Completed)
 - [x] Design system
 - [x] Reusable UI components
-- [x] All 5 main screens
+- [x] All 8 screens (Landing, Auth, 5 tabs, AI Coach)
 - [x] Mock data integration
 
-### 📝 Phase 2: Backend (Next - 3-5 months)
+### 📝 Phase 2: Backend + Blockchain Foundation (3-5 months)
 - [ ] Node.js server setup
-- [ ] MongoDB database
-- [ ] Authentication service
-- [ ] Payment integration
-- [ ] Investment APIs
+- [ ] MongoDB + Redis database
+- [ ] Authentication service (JWT, KYC)
+- [ ] Payment integration (Razorpay)
+- [ ] Investment APIs (Groww/Zerodha)
 - [ ] Basic analytics
+- [ ] **Deploy `GullakLedger.sol` on Polygon testnet**
 
-### 🤖 Phase 3: Agentic AI (5-7 months)
-- [ ] Python AI service
-- [ ] LangGraph framework
-- [ ] All 6 AI agents
-- [ ] Agent orchestration
+### 🤖 Phase 3: Agentic AI + AI Audit (5-7 months)
+- [ ] Python FastAPI AI service
+- [ ] LangGraph multi-agent framework
+- [ ] All 6 AI agents implemented
+- [ ] Agent orchestration and memory
+- [ ] **`GullakAIAudit.sol` — AI decision on-chain logging**
 
-### 🚀 Phase 4: Advanced Features (7-9 months)
-- [ ] Gamification system
-- [ ] Social features
+### 🔗 Phase 4: Blockchain & Advanced Features (7-9 months)
+- [ ] **`GullakGoal.sol` — Smart contract goal escrow**
+- [ ] **`GullakRewards.sol` — NFT achievement badges**
+- [ ] **DeFi yield integration (Aave/Compound)**
+- [ ] Full gamification system
+- [ ] Social features (clubs, challenges)
 - [ ] Advanced analytics
 - [ ] Push notifications
 
 ### 🎉 Phase 5: Launch (9-12 months)
-- [ ] Security audit
-- [ ] Beta testing
-- [ ] App store submission
+- [ ] Security audit + smart contract audit (Certik)
+- [ ] Performance testing
+- [ ] Beta testing (1,000 users)
+- [ ] **Polygon mainnet deployment**
+- [ ] App Store + Google Play submission
 - [ ] Marketing launch
 
 ---
 
 ## 🔐 Security & Compliance
 
-- **Bank-grade encryption** (AES-256)
-- **SEBI-compliant** investments
-- **KYC verification**
-- **Two-factor authentication**
-- **Biometric login**
-- **PCI-DSS** compliant payments
+- **Bank-grade encryption** (AES-256 at rest, TLS 1.3 in transit)
+- **SEBI-compliant** investments (registration in process)
+- **KYC verification** (Aadhaar + PAN via CKYC)
+- **Two-factor authentication** (OTP + TOTP)
+- **Biometric login** (Face ID / Fingerprint)
+- **PCI-DSS** compliant payments via Razorpay
+- **Smart contract audit** (Certik / OpenZeppelin Defender)
+- **AI decision audit trail** on Polygon blockchain
+- **Multi-sig wallet** for admin contract operations
 
 ---
 
@@ -290,12 +355,14 @@ All rights reserved. © 2025 Gullak
 
 ## 🎉 Current Status
 
-✅ **Frontend:** Complete with 8 screens (Landing, Auth, 5 Main Tabs)
+✅ **Frontend:** Complete with 8 screens (Landing, Auth, 5 Main Tabs, AI Coach)
 ✅ **Bottom Navigation:** 4 clean tabs with visible icons
 ✅ **Safe Area Support:** Perfect on all devices (notches, cutouts)
 ✅ **Authentication:** Beautiful UI (bypass mode for demo)
 📝 **Backend:** Fully documented, ready to implement
-🤖 **AI Agents:** Architecture designed
+🤖 **AI Agents:** Architecture designed (6 agents)
+🔗 **Blockchain:** Smart contracts designed (4 contracts on Polygon)
 💼 **Business Model:** Defined and validated
+📊 **Pitch Deck:** 20-slide deck prepared (Mumbai Hacks 2024)
 
-**→ Ready for demo and investor presentations!**
+**→ Ready for demo, investor presentations, and blockchain development!**
