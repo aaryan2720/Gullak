@@ -152,9 +152,9 @@ Each step card has:
 
 ---
 
-## 🏆 **Mumbai Hacks Competition Alignment**
+## 🏆 **Gullak Platform Competition Alignment**
 
-### **Theme: Agentic AI** ✅
+### **Powered by Agentic AI** ✅
 
 #### **Visual Demonstration**
 1. ✅ **Autonomous Agent**: Central robot emoji pulsing
@@ -304,7 +304,7 @@ Each step has a distinct color to represent its purpose:
 
 ---
 
-## 🚀 **Impact for Mumbai Hacks**
+## 🚀 **Impact for Gullak Platform**
 
 ### **Judges Will See:**
 1. **Immediate Visual**: Pulsing robot emoji (agent is alive!)
@@ -363,10 +363,10 @@ Each step has a distinct color to represent its purpose:
 - ✅ Zero TypeScript errors
 - ✅ Responsive layout
 - ✅ 60 FPS smooth animations
-- ✅ Mumbai Hacks theme perfectly demonstrated
+- ✅ Gullak Platform theme perfectly demonstrated
 
 ---
 
-**🏆 Ready for Mumbai Hacks! The autonomous agent is now front and center, visually demonstrating the power of Agentic AI!**
+**🏆 Ready for Gullak Platform! The autonomous agent is now front and center, visually demonstrating the power of Agentic AI!**
 
 🤖 **Gullak** - *Watch Your AI Agent Work for You*

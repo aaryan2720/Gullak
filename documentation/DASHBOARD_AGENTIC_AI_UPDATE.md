@@ -331,9 +331,9 @@ The dashboard demonstrates the **4-step agentic workflow** from the features pag
 
 ---
 
-## 🏆 Mumbai Hacks Competition Alignment
+## 🏆 Gullak Platform Competition Alignment
 
-### **Theme: Agentic AI** ✅
+### **Powered by Agentic AI** ✅
 
 **Dashboard Demonstrates:**
 1. ✅ **Autonomy:** Agent works 24/7 without user input
@@ -409,7 +409,7 @@ The dashboard demonstrates the **4-step agentic workflow** from the features pag
 
 ---
 
-## 🎯 Demo Script for Mumbai Hacks
+## 🎯 Demo Script for Gullak Platform
 
 ### **Opening (0-30 seconds):**
 "Welcome to Gullak Dashboard. Notice the live AI agent at the top—it's working 24/7 for you. Watch as it cycles through activities: observing transactions, analyzing patterns, calculating investments, executing actions. The scanning effect and pulsing robot show it's actively processing."
@@ -572,7 +572,7 @@ The **Dashboard Agentic AI Update** successfully transforms Gullak's home screen
 - **Smart Recommendations:** Goals and learning curated by agent
 - **Continuous Operation:** 24/7 metrics and never-ending animations
 
-**Perfect for Mumbai Hacks!** The dashboard immediately shows judges what agentic AI looks like in a real financial application. Users can visually see, understand, and trust the autonomous agent working for them.
+**Perfect for Gullak Platform!** The dashboard immediately shows judges what agentic AI looks like in a real financial application. Users can visually see, understand, and trust the autonomous agent working for them.
 
 ---
 

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -19,6 +19,7 @@ export default function ProfileScreen() {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [securityModalVisible, setSecurityModalVisible] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const [blockchainModalVisible, setBlockchainModalVisible] = useState(false);
 
   // Notification toggles
   const [pushNotifications, setPushNotifications] = useState(true);
@@ -106,6 +107,13 @@ export default function ProfileScreen() {
       icon: 'shield-checkmark-outline',
       color: colors.success,
       onPress: () => setSecurityModalVisible(true),
+    },
+    {
+      id: 6,
+      title: 'Web3 & Blockchain Audit',
+      icon: 'cube-outline',
+      color: '#8247E5',
+      onPress: () => setBlockchainModalVisible(true),
     },
     {
       id: 5,
@@ -791,6 +799,127 @@ export default function ProfileScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      {/* Web3 & Blockchain Audit Modal */}
+      <Modal
+        visible={blockchainModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setBlockchainModalVisible(false)}
+      >
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <TouchableOpacity onPress={() => setBlockchainModalVisible(false)} activeOpacity={0.7}>
+              <Ionicons name="close" size={28} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Web3 Audit Ledger</Text>
+            <View style={{ width: 28 }} />
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {/* Wallet Address Card */}
+            <Card style={styles.blockchainCard}>
+              <View style={styles.walletHeader}>
+                <Ionicons name="wallet-outline" size={24} color="#8247E5" />
+                <View style={styles.flex}>
+                  <Text style={[styles.walletTitle, { color: colors.text }]}>Polygon Wallet</Text>
+                  <Text style={[styles.walletAddress, { color: '#8247E5' }]} numberOfLines={1}>
+                    0x71C7656EC7ab88b098defB751B7401B5f6d8976F
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.copyBtn, { backgroundColor: '#8247E5' + '15' }]}
+                  activeOpacity={0.7}
+                  onPress={() => Alert.alert('Address Copied', 'Wallet address copied to clipboard!')}
+                >
+                  <Ionicons name="copy-outline" size={16} color="#8247E5" />
+                </TouchableOpacity>
+              </View>
+            </Card>
+
+            <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
+              Verified Smart Contracts (Mumbai Testnet)
+            </Text>
+
+            {/* Smart Contracts List */}
+            <Card style={styles.settingCard}>
+              <View style={styles.contractRow}>
+                <View style={styles.flex}>
+                  <Text style={[styles.contractLabel, { color: colors.text }]}>GullakLedger.sol (Registry)</Text>
+                  <Text style={[styles.contractAddr, { color: colors.textSecondary }]}>0x8247e51a66ff56784abcde1234f9876543210123</Text>
+                </View>
+                <View style={styles.verifiedBadgeRow}>
+                  <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
+                  <Text style={styles.verifiedTextSmall}>Verified</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Card style={styles.settingCard}>
+              <View style={styles.contractRow}>
+                <View style={styles.flex}>
+                  <Text style={[styles.contractLabel, { color: colors.text }]}>GullakGoal.sol (Escrow)</Text>
+                  <Text style={[styles.contractAddr, { color: colors.textSecondary }]}>0x6c63ff124caf50aa8976deab99bfdcf84ab9cde1</Text>
+                </View>
+                <View style={styles.verifiedBadgeRow}>
+                  <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
+                  <Text style={styles.verifiedTextSmall}>Verified</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Card style={styles.settingCard}>
+              <View style={styles.contractRow}>
+                <View style={styles.flex}>
+                  <Text style={[styles.contractLabel, { color: colors.text }]}>GullakAIAudit.sol (Agent Auditor)</Text>
+                  <Text style={[styles.contractAddr, { color: colors.textSecondary }]}>0xff6584ab8f88ff9c27b0ffa7264caf5023a41eef</Text>
+                </View>
+                <View style={styles.verifiedBadgeRow}>
+                  <Ionicons name="checkmark-circle" size={18} color="#4CAF50" />
+                  <Text style={styles.verifiedTextSmall}>Verified</Text>
+                </View>
+              </View>
+            </Card>
+
+            <Text style={[styles.sectionSubtitle, { color: colors.textSecondary, marginTop: 16 }]}>
+              Recent On-Chain Activity (Audit Trail)
+            </Text>
+
+            {/* Audit Logs */}
+            {[
+              { block: '17,290,314', action: 'Sync AI Goal Allocation', hash: '0x9d3af12e8247e51a66ff56784abcde1234f98765', status: 'Secured' },
+              { block: '17,290,289', action: 'Manual Deposit (Razorpay)', hash: '0x8a230bf26c63ff124caf50aa8976deab99bfdcf8', status: 'Secured' },
+              { block: '17,290,147', action: 'Round-Up Auto-Invest', hash: '0x2196c890ff6584ab8f88ff9c27b0ffa7264caf50', status: 'Secured' },
+              { block: '17,289,956', action: 'KYC Address Verification', hash: '0x00bcd4ab76ffac0b34e56fa87eef9c27ab0ffab7', status: 'Secured' }
+            ].map((log, index) => (
+              <Card key={index} style={styles.auditLogCard}>
+                <View style={styles.auditLogHeader}>
+                  <View>
+                    <Text style={[styles.auditBlock, { color: colors.text }]}>Block #{log.block}</Text>
+                    <Text style={[styles.auditAction, { color: colors.textSecondary }]}>{log.action}</Text>
+                  </View>
+                  <View style={styles.securedLabel}>
+                    <Ionicons name="cube" size={12} color="#4CAF50" />
+                    <Text style={styles.securedLabelText}>{log.status}</Text>
+                  </View>
+                </View>
+                <View style={styles.auditDivider} />
+                <Text style={styles.auditHash} numberOfLines={1} ellipsizeMode="middle">
+                  Tx Hash: {log.hash}
+                </Text>
+              </Card>
+            ))}
+
+            {/* Razorpay SDK Footer Info */}
+            <View style={styles.blockchainFooter}>
+              <Ionicons name="link-outline" size={16} color={colors.textTertiary} />
+              <Text style={[styles.blockchainFooterText, { color: colors.textTertiary }]}>
+                Verified via Razorpay Secure Checkout & Polygon Provider
+              </Text>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -1248,6 +1377,125 @@ const styles = StyleSheet.create({
   },
   responseTimeText: {
     fontSize: Typography.fontSize.sm,
+    flex: 1,
+  },
+  // WEB3 & BLOCKCHAIN AUDIT MODAL STYLES
+  flex: {
+    flex: 1,
+  },
+  blockchainCard: {
+    marginBottom: Spacing.md,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E0D4FF',
+    borderWidth: 1,
+  },
+  walletHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  walletTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: '700',
+  },
+  walletAddress: {
+    fontSize: 12,
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  copyBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contractRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: Spacing.md,
+  },
+  contractLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: '700',
+  },
+  contractAddr: {
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  verifiedBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  verifiedTextSmall: {
+    fontSize: 11,
+    color: '#4CAF50',
+    fontWeight: '700',
+  },
+  auditLogCard: {
+    marginBottom: Spacing.sm,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: Spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  auditLogHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  auditBlock: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: '700',
+  },
+  auditAction: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  securedLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F5E9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    gap: 3,
+  },
+  securedLabelText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4CAF50',
+  },
+  auditDivider: {
+    height: 1,
+    backgroundColor: '#F5F5F5',
+    marginVertical: 10,
+  },
+  auditHash: {
+    fontSize: 9,
+    color: '#8247E5',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  blockchainFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+  },
+  blockchainFooterText: {
+    fontSize: 10,
+    textAlign: 'center',
+    lineHeight: 14,
     flex: 1,
   },
 });

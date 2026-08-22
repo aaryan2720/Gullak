@@ -270,12 +270,13 @@ Gullak uses autonomous AI agents:
 - [x] Reusable UI components
 - [x] All 8 screens (Landing, Auth, 5 tabs, AI Coach)
 - [x] Mock data integration
+- [x] Mock Razorpay payment integration
 
 ### 📝 Phase 2: Backend + Blockchain Foundation (3-5 months)
 - [ ] Node.js server setup
 - [ ] MongoDB + Redis database
 - [ ] Authentication service (JWT, KYC)
-- [ ] Payment integration (Razorpay)
+- [x] **Razorpay payment gateway API integration**
 - [ ] Investment APIs (Groww/Zerodha)
 - [ ] Basic analytics
 - [ ] **Deploy `GullakLedger.sol` on Polygon testnet**
@@ -329,9 +330,9 @@ This is currently a private project. For collaboration inquiries, please refer t
 ## 📞 Support
 
 For questions about:
-- **Setup:** Check [README-FRONTEND.md](./README-FRONTEND.md)
-- **Backend:** See [BACKEND-REQUIREMENTS.md](./BACKEND-REQUIREMENTS.md)
-- **Features:** Review [DOCUMENTATION.md](./DOCUMENTATION.md)
+- **Setup:** Check [README-FRONTEND.md](./documentation/README-FRONTEND.md)
+- **Backend:** See [BACKEND-REQUIREMENTS.md](./documentation/BACKEND-REQUIREMENTS.md)
+- **Features:** Review [DOCUMENTATION.md](./documentation/DOCUMENTATION.md)
 
 ---
 
@@ -363,6 +364,6 @@ All rights reserved. © 2025 Gullak
 🤖 **AI Agents:** Architecture designed (6 agents)
 🔗 **Blockchain:** Smart contracts designed (4 contracts on Polygon)
 💼 **Business Model:** Defined and validated
-📊 **Pitch Deck:** 20-slide deck prepared (Mumbai Hacks 2024)
+📊 **Pitch Deck:** 20-slide deck prepared
 
 **→ Ready for demo, investor presentations, and blockchain development!**

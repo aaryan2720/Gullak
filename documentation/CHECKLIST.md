@@ -1,4 +1,4 @@
-# ✅ Grow-Z Project Checklist
+# ✅ Gullak Project Checklist
 
 > **Use this checklist to track your progress through each development phase**
 

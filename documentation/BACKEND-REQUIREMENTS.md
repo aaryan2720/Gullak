@@ -1,7 +1,7 @@
-# 🔧 Grow-Z Backend Requirements & Implementation Guide
+# 🔧 Gullak Backend Requirements & Implementation Guide
 
 ## 📋 Overview
-This document outlines detailed backend requirements, API specifications, database schemas, and integration guidelines for the Grow-Z micro-investing platform.
+This document outlines detailed backend requirements, API specifications, database schemas, and integration guidelines for the Gullak micro-investing platform.
 
 ---
 

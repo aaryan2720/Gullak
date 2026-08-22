@@ -1,4 +1,4 @@
-# 🚀 Grow-Z - Micro-Investing App for Gen-Z
+# 🚀 Gullak - Micro-Investing App for Gen-Z
 
 ## 📋 Table of Contents
 1. [Overview](#overview)
@@ -17,7 +17,7 @@
 
 ## 🎯 Overview
 
-**Grow-Z** is a micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like:
+**Gullak** is a micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like:
 - Feeling that investing is complicated or "for rich people"
 - Not having large sums to invest (only ₹100-₹500 spare)
 - Lack of knowledge about investment options
@@ -917,7 +917,7 @@ Numbers: SF Mono (Medium)
 
 ## 📞 Contact & Support
 
-**App Name:** Grow-Z
+**App Name:** Gullak
 **Target Audience:** Gen-Z (16-25 years)
 **Platform:** iOS & Android (React Native)
 **Version:** 1.0.0 (MVP)

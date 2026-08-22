@@ -1,6 +1,7 @@
 import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
 import ProgressBar from '@/components/ui/progress-bar';
+import RazorpayCheckout from '@/components/ui/razorpay-checkout';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -61,6 +63,10 @@ export default function GoalsScreen() {
   const [contributeModalVisible, setContributeModalVisible] = useState(false);
   const [contributeAmount, setContributeAmount] = useState('');
   const [selectedGoalId, setSelectedGoalId] = useState<number | null>(null);
+  
+  // Checkout states
+  const [checkoutVisible, setCheckoutVisible] = useState(false);
+  const [tempAmount, setTempAmount] = useState(0);
 
   const emojiOptions = ['🎯', '📱', '💻', '✈️', '🏠', '🚗', '🎓', '💍', '🏖️', '🎮', '📷', '🎸'];
   const colorOptions = [
@@ -112,10 +118,20 @@ export default function GoalsScreen() {
       return;
     }
 
+    // Set temp amount and open checkout
+    setTempAmount(amount);
+    setContributeModalVisible(false);
+    
+    setTimeout(() => {
+      setCheckoutVisible(true);
+    }, 150);
+  };
+
+  const handlePaymentSuccess = (paymentId: string, txHash: string) => {
     setGoals(
       goals.map((goal) => {
         if (goal.id === selectedGoalId) {
-          const newCurrent = goal.current + amount;
+          const newCurrent = goal.current + tempAmount;
           const newProgress = Math.min((newCurrent / goal.target) * 100, 100);
           return { ...goal, current: newCurrent, progress: Math.round(newProgress) };
         }
@@ -123,9 +139,16 @@ export default function GoalsScreen() {
       })
     );
 
+    setCheckoutVisible(false);
     setContributeAmount('');
     setSelectedGoalId(null);
-    setContributeModalVisible(false);
+    setTempAmount(0);
+
+    Alert.alert(
+      'Goal Updated! 🎯',
+      `Successfully contributed ₹${tempAmount.toLocaleString()} to your goal.\n\nRazorpay ID: ${paymentId}\nPolygon Tx Hash: ${txHash.slice(0, 10)}...${txHash.slice(-6)}`,
+      [{ text: 'Woohoo!' }]
+    );
   };
 
   return (
@@ -518,6 +541,14 @@ export default function GoalsScreen() {
           </View>
         </SafeAreaView>
       </Modal>
+
+      {/* Razorpay Checkout sheet */}
+      <RazorpayCheckout
+        visible={checkoutVisible}
+        amount={tempAmount}
+        onSuccess={handlePaymentSuccess}
+        onClose={() => setCheckoutVisible(false)}
+      />
       </SafeAreaView>
     </LinearGradient>
   );

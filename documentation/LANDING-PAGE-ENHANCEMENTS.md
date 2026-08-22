@@ -1,4 +1,4 @@
-# Landing Page Enhancements - Grow-Z
+# Landing Page Enhancements - Gullak
 
 ## Overview
 This document details the comprehensive visual enhancements made to the landing page (`app/index.tsx`) to create a more polished, professional, and Gen-Z friendly first impression.
@@ -13,7 +13,7 @@ The logo now features a sophisticated 3-layer structure:
 
 **Visual Impact**: Creates depth and draws attention to the brand identity
 
-### 2. **Enhanced Brand Name "Grow-Z"**
+### 2. **Enhanced Brand Name "Gullak"**
 The brand name is now split into two parts with distinct styling:
 - **"Grow"**: 
   - White color, 40px font size
@@ -57,7 +57,7 @@ Each stat card now features:
 
 #### Section Header
 - **Badge**: Gold "FEATURES" label with star icon
-- **Title**: "Why Choose Grow-Z?" (28px, font weight: 900)
+- **Title**: "Why Choose Gullak?" (28px, font weight: 900)
 - **Subtitle**: "Everything you need to start your investment journey"
 
 #### Feature Cards
@@ -163,7 +163,7 @@ Each card features:
 
 ### Before
 - Simple logo with single trending-up icon
-- Plain "Grow-Z" text in white
+- Plain "Gullak" text in white
 - Basic stats cards with rgba backgrounds
 - Simple feature list with colored circles
 - Basic trust badges in vertical list

@@ -1,4 +1,4 @@
-# 🚀 Grow-Z - Quick Start Guide
+# 🚀 Gullak - Quick Start Guide
 
 ## ⚡ Get Started in 3 Steps
 
@@ -79,4 +79,4 @@ Check these files:
 
 ---
 
-**You're all set! Start exploring Grow-Z! 🎉**
+**You're all set! Start exploring Gullak! 🎉**

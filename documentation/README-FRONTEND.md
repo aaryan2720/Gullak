@@ -1,6 +1,6 @@
-# 📱 Grow-Z Frontend - Setup & Development Guide
+# 📱 Gullak Frontend - Setup & Development Guide
 
-Welcome to the **Grow-Z** frontend! This is a React Native application built with Expo and designed for Gen-Z micro-investing.
+Welcome to the **Gullak** frontend! This is a React Native application built with Expo and designed for Gen-Z micro-investing.
 
 ## 🚀 Quick Start
 
@@ -37,7 +37,7 @@ Welcome to the **Grow-Z** frontend! This is a React Native application built wit
 ## 📁 Project Structure
 
 ```
-Grow-z/
+Gullak/
 ├── app/                          # App screens using Expo Router
 │   ├── (tabs)/                  # Tab-based navigation
 │   │   ├── _layout.tsx          # Tab navigator configuration
@@ -118,7 +118,7 @@ function MyComponent() {
         color: colors.text,
         fontSize: Typography.fontSize.lg 
       }}>
-        Hello Grow-Z!
+        Hello Gullak!
       </Text>
     </View>
   );

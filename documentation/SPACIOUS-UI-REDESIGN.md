@@ -1,4 +1,4 @@
-# 🎨 SPACIOUS UI REDESIGN - Grow-Z Landing Page
+# 🎨 SPACIOUS UI REDESIGN - Gullak Landing Page
 
 ## 📋 Problem Statement
 The previous landing page was **cramped** and **clumsy** with:
@@ -24,7 +24,7 @@ The previous landing page was **cramped** and **clumsy** with:
    - 3 sparkles positioned around
    - Lots of space around it
 
-2. **Brand Name "Grow-Z"**
+2. **Brand Name "Gullak"**
    - 56px ultra-bold
    - "-Z" in gold gradient box
    - Tagline badge below
@@ -57,7 +57,7 @@ The previous landing page was **cramped** and **clumsy** with:
 2. **Fixed CTA Buttons**
    - "Get Started - Free ₹100" (Primary gradient)
    - "Already have account? Sign In" (Secondary text)
-   - "Learn more about Grow-Z" → Routes to `/features`
+   - "Learn more about Gullak" → Routes to `/features`
 
 ---
 
@@ -69,7 +69,7 @@ The previous landing page was **cramped** and **clumsy** with:
 
 ### **1. Intro Section**
 - Title: "Everything You Need to Start Investing"
-- Subtitle explaining Grow-Z's mission
+- Subtitle explaining Gullak's mission
 - Spacious padding (24px)
 
 ### **2. 6 Feature Cards** (Full Details)
@@ -192,7 +192,7 @@ elevation: 3-4
 ├─────────────────────────────────┤
 │  [Get Started - Free ₹100]     │
 │  Already have account? Sign In  │
-│  Learn more about Grow-Z →     │
+│  Learn more about Gullak →     │
 └─────────────────────────────────┘
 ```
 
@@ -355,7 +355,7 @@ app/index.tsx → Replaced with clean spacious version
 
 ## 🎉 FINAL RESULT
 
-The Grow-Z landing page now has:
+The Gullak landing page now has:
 - **70% Hero** with animated logo, brand name, and compelling message
 - **30% Info** with just 3 value props (not overwhelming)
 - **Dedicated Features Screen** for detailed information

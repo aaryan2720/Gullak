@@ -1,17 +1,69 @@
 import Card from '@/components/ui/card';
 import ProgressBar from '@/components/ui/progress-bar';
+import RazorpayCheckout from '@/components/ui/razorpay-checkout';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InvestScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [autoInvestEnabled, setAutoInvestEnabled] = useState(false);
+
+  // Dynamic portfolio states
+  const [totalInvested, setTotalInvested] = useState(24567);
+  const [currentValue, setCurrentValue] = useState(26845);
+  const [monthlyInvested, setMonthlyInvested] = useState(1245);
+  
+  // Payment states
+  const [amountModalVisible, setAmountModalVisible] = useState(false);
+  const [checkoutVisible, setCheckoutVisible] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState('500');
+  const [investmentType, setInvestmentType] = useState<'One-Time' | 'SIP' | 'Bonus'>('One-Time');
+
+  // Calculates returns values
+  const returnsValue = currentValue - totalInvested;
+  const returnsPercent = ((returnsValue / totalInvested) * 100).toFixed(1);
+
+  const handleOpenAmountModal = (type: 'One-Time' | 'SIP' | 'Bonus') => {
+    setInvestmentType(type);
+    if (type === 'One-Time') setSelectedAmount('500');
+    else if (type === 'SIP') setSelectedAmount('1000');
+    else setSelectedAmount('250');
+    setAmountModalVisible(true);
+  };
+
+  const handleProceedToPayment = () => {
+    const amt = parseInt(selectedAmount);
+    if (isNaN(amt) || amt <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid investment amount.');
+      return;
+    }
+    setAmountModalVisible(false);
+    setTimeout(() => {
+      setCheckoutVisible(true);
+    }, 100);
+  };
+
+  const handlePaymentSuccess = (paymentId: string, txHash: string) => {
+    const amt = parseInt(selectedAmount);
+    setCheckoutVisible(false);
+    
+    // Dynamically update portfolio
+    setTotalInvested(prev => prev + amt);
+    setCurrentValue(prev => prev + amt);
+    setMonthlyInvested(prev => prev + amt);
+
+    Alert.alert(
+      'Investment Successful! 🎉',
+      `You invested ₹${amt.toLocaleString()} successfully.\n\nRazorpay ID: ${paymentId}\nPolygon Tx Hash: ${txHash.slice(0, 10)}...${txHash.slice(-6)}\n\nYour portfolio has been updated in real-time.`,
+      [{ text: 'Great!' }]
+    );
+  };
 
   return (
     <LinearGradient
@@ -45,17 +97,17 @@ export default function InvestScreen() {
               <Text style={styles.verifiedText}>Verified</Text>
             </View>
           </View>
-          <Text style={styles.totalValue}>₹24,567</Text>
+          <Text style={styles.totalValue}>₹{totalInvested.toLocaleString()}</Text>
           <View style={styles.totalStats}>
             <View style={styles.totalStatItem}>
               <Text style={styles.totalStatLabel}>Current Value</Text>
-              <Text style={styles.totalStatValue}>₹26,845</Text>
+              <Text style={styles.totalStatValue}>₹{currentValue.toLocaleString()}</Text>
             </View>
             <View style={styles.totalStatDivider} />
             <View style={styles.totalStatItem}>
               <Text style={styles.totalStatLabel}>Returns</Text>
               <Text style={[styles.totalStatValue, { color: '#4CAF50' }]}>
-                +₹2,278 (9.3%)
+                +₹{returnsValue.toLocaleString()} ({returnsPercent}%)
               </Text>
             </View>
           </View>
@@ -76,7 +128,7 @@ export default function InvestScreen() {
               <View style={[styles.performanceIcon, { backgroundColor: '#4CAF50' + '20' }]}>
                 <Ionicons name="trending-up" size={20} color="#4CAF50" />
               </View>
-              <Text style={[styles.performanceValue, { color: colors.text }]}>₹1,245</Text>
+              <Text style={[styles.performanceValue, { color: colors.text }]}>₹{monthlyInvested.toLocaleString()}</Text>
               <Text style={[styles.performanceLabel, { color: colors.textSecondary }]}>
                 Invested
               </Text>
@@ -103,7 +155,7 @@ export default function InvestScreen() {
               <View style={[styles.performanceIcon, { backgroundColor: '#9C27B0' + '20' }]}>
                 <Ionicons name="trophy" size={20} color="#9C27B0" />
               </View>
-              <Text style={[styles.performanceValue, { color: colors.text }]}>+15%</Text>
+              <Text style={[styles.performanceValue, { color: colors.text }]}>+9.3%</Text>
               <Text style={[styles.performanceLabel, { color: colors.textSecondary }]}>
                 Growth
               </Text>
@@ -289,6 +341,7 @@ export default function InvestScreen() {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#FFFFFF' }]}
               activeOpacity={0.7}
+              onPress={() => handleOpenAmountModal('One-Time')}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#4CAF50' + '20' }]}>
                 <Ionicons name="wallet" size={24} color="#4CAF50" />
@@ -301,6 +354,7 @@ export default function InvestScreen() {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#FFFFFF' }]}
               activeOpacity={0.7}
+              onPress={() => handleOpenAmountModal('SIP')}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#2196F3' + '20' }]}>
                 <Ionicons name="calendar" size={24} color="#2196F3" />
@@ -313,6 +367,7 @@ export default function InvestScreen() {
             <TouchableOpacity
               style={[styles.quickActionCard, { backgroundColor: colorScheme === 'dark' ? '#2A2A2A' : '#FFFFFF' }]}
               activeOpacity={0.7}
+              onPress={() => handleOpenAmountModal('Bonus')}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#FF9800' + '20' }]}>
                 <Ionicons name="gift" size={24} color="#FF9800" />
@@ -323,6 +378,83 @@ export default function InvestScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Choose Amount Modal */}
+        <Modal
+          visible={amountModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setAmountModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.amountModalContent, { backgroundColor: colors.background }]}>
+              <View style={styles.modalHeaderRow}>
+                <Text style={[styles.modalHeading, { color: colors.text }]}>
+                  {investmentType} Investment
+                </Text>
+                <TouchableOpacity onPress={() => setAmountModalVisible(false)}>
+                  <Ionicons name="close" size={24} color={colors.text} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.modalDesc, { color: colors.textSecondary }]}>
+                Choose or enter the amount you want to invest. This transaction will be processed securely via Razorpay.
+              </Text>
+
+              {/* Quick Select Buttons */}
+              <View style={styles.quickSelectRow}>
+                {['100', '500', '1000', '5000'].map((amt) => (
+                  <TouchableOpacity
+                    key={amt}
+                    style={[
+                      styles.quickAmtBtn,
+                      selectedAmount === amt && { backgroundColor: colors.primary }
+                    ]}
+                    onPress={() => setSelectedAmount(amt)}
+                  >
+                    <Text
+                      style={[
+                        styles.quickAmtText,
+                        selectedAmount === amt ? { color: '#FFFFFF', fontWeight: '700' } : { color: colors.text }
+                      ]}
+                    >
+                      ₹{parseInt(amt).toLocaleString()}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Custom Input */}
+              <View style={[styles.inputWrapper, { borderColor: colors.border }]}>
+                <Text style={[styles.currencyPrefix, { color: colors.textSecondary }]}>₹</Text>
+                <TextInput
+                  style={[styles.customInput, { color: colors.text }]}
+                  keyboardType="numeric"
+                  value={selectedAmount}
+                  onChangeText={setSelectedAmount}
+                  placeholder="Enter custom amount"
+                  placeholderTextColor={colors.textTertiary}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.proceedBtn, { backgroundColor: colors.primary }]}
+                activeOpacity={0.8}
+                onPress={handleProceedToPayment}
+              >
+                <Text style={styles.proceedBtnText}>Proceed to Pay ₹{parseInt(selectedAmount || '0').toLocaleString()}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Razorpay Checkout sheet */}
+        <RazorpayCheckout
+          visible={checkoutVisible}
+          amount={parseInt(selectedAmount || '0')}
+          onSuccess={handlePaymentSuccess}
+          onClose={() => setCheckoutVisible(false)}
+        />
 
         {/* Investment Allocation */}
         <View style={styles.section}>
@@ -850,5 +982,85 @@ const styles = StyleSheet.create({
   insightDesc: {
     fontSize: Typography.fontSize.sm,
     lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  amountModalContent: {
+    width: '100%',
+    borderRadius: 20,
+    padding: Spacing.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  modalHeading: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: '700',
+  },
+  modalDesc: {
+    fontSize: Typography.fontSize.sm,
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
+  },
+  quickSelectRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: Spacing.xs,
+    marginBottom: Spacing.lg,
+  },
+  quickAmtBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    alignItems: 'center',
+  },
+  quickAmtText: {
+    fontSize: Typography.fontSize.sm,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.md,
+    height: 52,
+    marginBottom: Spacing.xl,
+  },
+  currencyPrefix: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: '700',
+    marginRight: 6,
+  },
+  customInput: {
+    flex: 1,
+    fontSize: Typography.fontSize.base,
+    fontWeight: '600',
+    height: '100%',
+  },
+  proceedBtn: {
+    borderRadius: 12,
+    height: 52,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  proceedBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: Typography.fontSize.base,
   },
 });

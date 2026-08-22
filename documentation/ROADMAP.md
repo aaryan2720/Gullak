@@ -1,4 +1,4 @@
-# 🗺️ Grow-Z Development Roadmap
+# 🗺️ Gullak Development Roadmap
 
 > **Status:** MVP UI Complete | Backend Ready to Implement
 

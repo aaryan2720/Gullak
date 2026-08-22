@@ -1,4 +1,4 @@
-# 🪙 Gullak - Mumbai Hacks Pitch Deck
+# 🪙 Gullak - Gullak Platform Pitch Deck
 
 ---
 
@@ -7,8 +7,8 @@
 # 🏺 Gullak
 ### *Your Digital Savings Pot, Managed by AI*
 
-**Mumbai Hacks 2024**  
-Theme: Agentic AI
+**Gullak Platform**  
+Powered by Agentic AI
 
 *Built by: Aaryan*
 
@@ -300,9 +300,9 @@ User earns while learning → AI educates → Financial freedom
 
 ---
 
-## **Slide 15: Mumbai Hacks Alignment** 🎯
+## **Slide 15: Gullak Platform Alignment** 🎯
 
-### **Theme: Agentic AI** ✅
+### **Powered by Agentic AI** ✅
 
 **We nailed it!**
 
@@ -452,7 +452,7 @@ User earns while learning → AI educates → Financial freedom
 
 ---
 
-**Thank you, Mumbai Hacks! 🙏**
+**Thank you, Gullak Platform! 🙏**
 
 ---
 
@@ -534,6 +534,6 @@ User earns while learning → AI educates → Financial freedom
 
 ---
 
-**Built with ❤️ for Mumbai Hacks | Powered by Agentic AI 🤖**
+**Built with ❤️ for Gullak Platform | Powered by Agentic AI 🤖**
 
 🏺 **Gullak** - *Your Digital Savings Pot, Managed by AI*

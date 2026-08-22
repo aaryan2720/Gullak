@@ -1,6 +1,6 @@
 # 🪙 Gullak - AI-Powered Micro-Investing Platform
 
-> **Mumbai Hacks Competition Entry** - Theme: Agentic AI
+> **Gullak Platform Competition Entry** - Powered by Agentic AI
 
 ## 📌 Project Overview
 
@@ -23,7 +23,7 @@ Gullak deploys multiple specialized AI agents that work autonomously to:
 
 ---
 
-## 🤖 **Agentic AI Features** (Mumbai Hacks Theme)
+## 🤖 **Agentic AI Features** (Gullak Platform Theme)
 
 ### 1. **Auto Round-up Agent** 🔄
 - **What it does**: Monitors every transaction, rounds up to nearest ₹10
@@ -244,9 +244,9 @@ Each AI agent:
 
 ---
 
-## 🏆 **Mumbai Hacks Competition Alignment**
+## 🏆 **Gullak Platform Competition Alignment**
 
-### **Theme: Agentic AI** ✅
+### **Powered by Agentic AI** ✅
 - **6 Autonomous AI Agents** working 24/7
 - **Multi-agent orchestration** for complex financial decisions
 - **Continuous learning** from user behavior
@@ -307,7 +307,7 @@ MIT License - Open source for educational purposes
 
 ## 🙏 **Acknowledgments**
 
-- **Mumbai Hacks** - For the Agentic AI theme and opportunity
+- **Gullak Platform** - For the Agentic AI theme and opportunity
 - **Indian Savings Culture** - Inspiration for "Gullak" branding
 - **Open Source Community** - React Native, Expo, and AI tools
 
@@ -316,7 +316,7 @@ MIT License - Open source for educational purposes
 ## 📞 **Contact**
 
 - **GitHub**: [@aaryan2720](https://github.com/aaryan2720)
-- **Project Repository**: [Gullak on GitHub](https://github.com/aaryan2720/Grow-z)
+- **Project Repository**: [Gullak on GitHub](https://github.com/aaryan2720/Gullak)
 
 ---
 
@@ -331,6 +331,6 @@ MIT License - Open source for educational purposes
 
 ---
 
-**Built with ❤️ for Mumbai Hacks | Powered by Agentic AI 🤖**
+**Built with ❤️ for Gullak Platform | Powered by Agentic AI 🤖**
 
 🏺 **Gullak** - *Your Digital Savings Pot, Managed by AI*

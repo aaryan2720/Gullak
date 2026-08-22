@@ -482,7 +482,7 @@ import { Modal, Switch, Alert } from 'react-native';
 - Generic notifications
 - No Gen Z language
 - Non-functional logout
-- App name: "Grow-Z"
+- App name: "Gullak"
 
 ### **AFTER:**
 - **5 full modal screens**
@@ -610,7 +610,7 @@ The **Settings/Profile page** is now a **complete, functional settings hub** wit
 - ✅ **50+ new styles** for all modal components
 - ✅ **Zero TypeScript errors** (only minor style warnings)
 
-**Perfect for Mumbai Hacks!** Users can explore detailed settings, see linked bank accounts with agent management, customize Gen Z style notifications, review security options, access multiple support channels, and logout safely back to the landing page.
+**Perfect for Gullak Platform!** Users can explore detailed settings, see linked bank accounts with agent management, customize Gen Z style notifications, review security options, access multiple support channels, and logout safely back to the landing page.
 
 ---
 

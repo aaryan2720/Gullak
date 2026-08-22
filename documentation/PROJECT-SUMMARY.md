@@ -1,8 +1,8 @@
-# 🎉 Grow-Z - Project Summary
+# 🎉 Gullak - Project Summary
 
 ## ✅ What's Been Built
 
-Congratulations! The **Grow-Z** frontend UI has been successfully created with a complete, production-ready structure designed specifically for Gen-Z micro-investing.
+Congratulations! The **Gullak** frontend UI has been successfully created with a complete, production-ready structure designed specifically for Gen-Z micro-investing.
 
 ---
 
@@ -152,7 +152,7 @@ Congratulations! The **Grow-Z** frontend UI has been successfully created with a
 ## 🗂️ Project Structure
 
 ```
-Grow-z/
+Gullak/
 ├── 📄 DOCUMENTATION.md              ← Full project documentation
 ├── 📄 BACKEND-REQUIREMENTS.md       ← Backend API specs
 ├── 📄 README-FRONTEND.md            ← Frontend guide
@@ -262,7 +262,7 @@ The backend documentation includes:
 
 ## 💰 Monetization Strategy
 
-As documented, Grow-Z will generate revenue through:
+As documented, Gullak will generate revenue through:
 1. **Micro-transaction fees** (0.2% per investment)
 2. **Premium subscription** (₹99/month for AI Advisor Pro)
 3. **Affiliate partnerships** (Mutual fund referrals)
@@ -390,7 +390,7 @@ You now have a **fully functional, visually appealing prototype** that you can:
 
 ## 🌟 Final Notes
 
-**Grow-Z is now ready for the next phase!**
+**Gullak is now ready for the next phase!**
 
 You have:
 ✅ Complete UI/UX implementation
@@ -402,7 +402,7 @@ You have:
 ✅ Revenue model
 ✅ Success metrics
 
-**The foundation is solid. Time to build the backend and bring Grow-Z to life!** 🚀💜
+**The foundation is solid. Time to build the backend and bring Gullak to life!** 🚀💜
 
 ---
 
