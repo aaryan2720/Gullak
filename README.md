@@ -1,5 +1,7 @@
 # 🏺 Gullak - AI & Blockchain Micro-Investing App for Gen-Z
 
+![Gullak Logo](./assets/images/logo.png)
+
 > **"Pocket-sized Investing for Gen Z — Powered by AI & Blockchain"**
 
 Gullak is a revolutionary micro-investing and financial education platform designed specifically for young adults (Gen-Z and early millennials) who want to start investing but face barriers like complexity, limited funds, and lack of knowledge. Every transaction is backed by **autonomous AI agents** and recorded on an **immutable blockchain ledger** — making wealth creation transparent, automated, and accessible from just ₹10.
