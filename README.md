@@ -1,4 +1,4 @@
-# 🏺 Gullak - AI & Blockchain Micro-Investing App for Gen-Z
+# Gullak - AI & Blockchain Micro-Investing App for Gen-Z
 
 ![Gullak Logo](./assets/images/logo.png)
 
