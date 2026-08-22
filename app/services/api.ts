@@ -1,7 +1,21 @@
 import { Alert } from 'react-native';
+import Constants from 'expo-constants';
 
-const API_BASE_URL = 'http://localhost:5000/api';
-const AI_BASE_URL = 'http://localhost:8000/api/ai';
+// Automatically detect the host computer's IP address on the local network (for physical device testing with Expo Go)
+const getLocalDevIp = () => {
+  const hostUri = Constants.expoConfig?.hostUri;
+  if (!hostUri) return 'localhost';
+  
+  // hostUri looks like "192.168.1.50:8081" or "10.0.0.5:8081"
+  const ip = hostUri.split(':')[0];
+  return ip || 'localhost';
+};
+
+const devIp = getLocalDevIp();
+console.log(`[Gullak API] Local Development Machine IP detected: ${devIp}`);
+
+const API_BASE_URL = `http://${devIp}:5000/api`;
+const AI_BASE_URL = `http://${devIp}:8000/api/ai`;
 
 // In-memory token storage
 let authToken: string | null = null;
