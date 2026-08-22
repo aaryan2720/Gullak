@@ -7,6 +7,8 @@
 # 🏺 Gullak
 ### *Your Digital Savings Pot, Managed by AI*
 
+![Gullak Logo](file:///d:/Documents/Gullak/assets/images/logo.png)
+
 **Gullak Platform**  
 Powered by Agentic AI
 
@@ -250,30 +252,29 @@ User earns while learning → AI educates → Financial freedom
 
 ---
 
-## **Slide 13: Tech Stack** 🛠️
+## **Slide 13: Tech Stack & Integrations** 🛠️
 
 ### **Production-Ready Architecture**
 
 **Frontend**
-- React Native (Expo) + TypeScript
-- Cross-platform (iOS + Android)
-- Beautiful animations & gradients
+- React Native (Expo) + TypeScript (iOS + Android)
+- Simulated **Razorpay Sandbox Checkout SDK** for secure micro-deposits
+- On-chain Polygon wallet integration & tx receipt verification
 
-**Backend** (Proposed)
-- Node.js API + Python AI services
-- PostgreSQL + Redis
-- Docker + Kubernetes
+**Backend & Blockchain** (Proposed/MVP)
+- Node.js API + Python FastAPI AI services
+- **Polygon Smart Contracts** (`GullakLedger.sol`, `GullakGoal.sol`, `GullakAIAudit.sol`)
+- PostgreSQL + Redis caching
 
-**AI/ML**
-- LangChain (agent orchestration)
-- OpenAI GPT-4 (conversational AI)
+**AI/ML & Agentic Framework**
+- LangChain / LangGraph (agent orchestration)
+- OpenAI GPT-4 (conversational financial coach)
 - Scikit-learn (portfolio optimization)
-- TensorFlow (fraud detection)
+- TensorFlow (anomaly detection)
 
-**Security**
-- 256-bit encryption
-- SEBI compliance ready
-- Biometric authentication
+**Payments & Security**
+- PCI-DSS compliant payments via **Razorpay API**
+- 256-bit AES database encryption & biometric auth (Face ID/Fingerprint)
 
 ---
 
