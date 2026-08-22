@@ -13,6 +13,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiService } from './services/api';
 
 export default function AICoachScreen() {
   const router = useRouter();
@@ -33,26 +34,37 @@ export default function AICoachScreen() {
     { icon: 'cash', label: 'Budget help', color: '#2196F3' },
   ];
 
-  const handleSend = () => {
-    if (message.trim()) {
+  const handleSend = async () => {
+    const userMessage = message.trim();
+    if (userMessage) {
       // Add user message
-      setMessages([...messages, {
+      setMessages(prev => [...prev, {
         id: Date.now().toString(),
         type: 'user',
-        text: message,
+        text: userMessage,
         time: 'Just now',
       }]);
       setMessage('');
       
-      // Simulate AI response after a delay
-      setTimeout(() => {
+      try {
+        // Fetch response from API service
+        const res = await apiService.askAICoach(userMessage, 'moderate');
+        if (res && res.success) {
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 1).toString(),
+            type: 'bot',
+            text: res.response,
+            time: 'Just now',
+          }]);
+        }
+      } catch (err) {
         setMessages(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           type: 'bot',
-          text: '🤖 Great question! Based on your profile, I\'d recommend starting with low-risk mutual funds. Your current savings pattern shows you can invest ₹500/month comfortably!',
+          text: "🤖 Sorry, I'm having trouble connecting to the AI Coach. Please try again.",
           time: 'Just now',
         }]);
-      }, 1500);
+      }
     }
   };
 

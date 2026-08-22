@@ -5,9 +5,10 @@ import { Colors, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiService } from '../services/api';
 
 export default function InvestScreen() {
   const colorScheme = useColorScheme();
@@ -19,6 +20,18 @@ export default function InvestScreen() {
   const [currentValue, setCurrentValue] = useState(26845);
   const [monthlyInvested, setMonthlyInvested] = useState(1245);
   
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      const data = await apiService.getPortfolio();
+      if (data && data.summary && data.summary.totalInvested > 0) {
+        setTotalInvested(data.summary.totalInvested);
+        setCurrentValue(data.summary.currentValue);
+        setMonthlyInvested(data.summary.totalInvested * 0.05); // Simulated monthly portion
+      }
+    };
+    loadPortfolioData();
+  }, []);
+
   // Payment states
   const [amountModalVisible, setAmountModalVisible] = useState(false);
   const [checkoutVisible, setCheckoutVisible] = useState(false);
@@ -49,10 +62,13 @@ export default function InvestScreen() {
     }, 100);
   };
 
-  const handlePaymentSuccess = (paymentId: string, txHash: string) => {
+  const handlePaymentSuccess = async (paymentId: string, txHash: string) => {
     const amt = parseInt(selectedAmount);
     setCheckoutVisible(false);
     
+    // API Call
+    await apiService.investManual(amt, { indexFunds: 60, digitalGold: 30, bonds: 10 });
+
     // Dynamically update portfolio
     setTotalInvested(prev => prev + amt);
     setCurrentValue(prev => prev + amt);

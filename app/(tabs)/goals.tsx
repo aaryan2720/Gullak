@@ -5,7 +5,7 @@ import RazorpayCheckout from '@/components/ui/razorpay-checkout';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ScrollView,
@@ -17,9 +17,10 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiService } from '../services/api';
 
 interface Goal {
-  id: number;
+  id: number | string;
   emoji: string;
   title: string;
   current: number;
@@ -55,16 +56,30 @@ export default function GoalsScreen() {
     },
   ]);
 
+  useEffect(() => {
+    const loadGoalsData = async () => {
+      const data = await apiService.getGoals();
+      if (data) {
+        const mapped = data.map((g: any) => ({
+          ...g,
+          progress: Math.round(Math.min((g.current / g.target) * 100, 100))
+        }));
+        setGoals(mapped);
+      }
+    };
+    loadGoalsData();
+  }, []);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('🎯');
   const [selectedColor, setSelectedColor] = useState(colors.primary);
+
+  // Contribution modal states
   const [contributeModalVisible, setContributeModalVisible] = useState(false);
-  const [contributeAmount, setContributeAmount] = useState('');
-  const [selectedGoalId, setSelectedGoalId] = useState<number | null>(null);
-  
-  // Checkout states
+  const [selectedGoalId, setSelectedGoalId] = useState<number | string | null>(null);
+  const [contributeAmount, setContributeAmount] = useState('1,000');
   const [checkoutVisible, setCheckoutVisible] = useState(false);
   const [tempAmount, setTempAmount] = useState(0);
 
@@ -78,7 +93,7 @@ export default function GoalsScreen() {
     { color: '#FF6584', name: 'Pink' },
   ];
 
-  const handleAddGoal = () => {
+  const handleAddGoal = async () => {
     if (!newGoalTitle.trim() || !newGoalTarget.trim()) {
       return;
     }
@@ -88,8 +103,21 @@ export default function GoalsScreen() {
       return;
     }
 
+    // Default target date is 6 months from now
+    const targetDate = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    // API Call
+    await apiService.createGoal(
+      newGoalTitle,
+      targetAmount,
+      targetDate,
+      'custom',
+      selectedEmoji,
+      selectedColor
+    );
+
     const newGoal: Goal = {
-      id: Date.now(),
+      id: goals.length + 1,
       emoji: selectedEmoji,
       title: newGoalTitle,
       current: 0,
@@ -99,13 +127,11 @@ export default function GoalsScreen() {
     };
 
     setGoals([...goals, newGoal]);
-    
-    // Reset form
+    setModalVisible(false);
     setNewGoalTitle('');
     setNewGoalTarget('');
     setSelectedEmoji('🎯');
     setSelectedColor(colors.primary);
-    setModalVisible(false);
   };
 
   const handleContribute = () => {
@@ -127,7 +153,12 @@ export default function GoalsScreen() {
     }, 150);
   };
 
-  const handlePaymentSuccess = (paymentId: string, txHash: string) => {
+  const handlePaymentSuccess = async (paymentId: string, txHash: string) => {
+    // API Call
+    if (selectedGoalId) {
+      await apiService.investManual(tempAmount, { indexFunds: 60, digitalGold: 30, bonds: 10 }, selectedGoalId);
+    }
+
     setGoals(
       goals.map((goal) => {
         if (goal.id === selectedGoalId) {

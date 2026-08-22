@@ -14,17 +14,27 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiService } from './services/api';
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSignIn = () => {
-    // Bypass authentication - go directly to tabs
-    router.replace('/(tabs)');
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+    const res = await apiService.login(email, password);
+    if (res.success) {
+      router.replace('/(tabs)');
+    } else {
+      Alert.alert('Login Failed', res.error?.message || 'Invalid credentials');
+    }
   };
 
   return (

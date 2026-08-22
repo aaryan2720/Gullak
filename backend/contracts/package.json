@@ -1,0 +1,17 @@
+{
+  "name": "gullak-contracts",
+  "version": "1.0.0",
+  "description": "Polygon Smart Contracts for Gullak Audit Ledger",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "node": "npx hardhat node"
+  },
+  "dependencies": {
+    "hardhat": "^2.22.5"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}

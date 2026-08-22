@@ -15,8 +15,10 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { apiService } from './services/api';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -28,9 +30,21 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSignUp = () => {
-    // Bypass authentication - go directly to tabs
-    router.replace('/(tabs)');
+  const handleSignUp = async () => {
+    if (!name || !email || !phone || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+    const res = await apiService.register(name, email, phone, password);
+    if (res.success) {
+      router.replace('/(tabs)');
+    } else {
+      Alert.alert('Registration Failed', res.error?.message || 'Verification failed');
+    }
   };
 
   return (
