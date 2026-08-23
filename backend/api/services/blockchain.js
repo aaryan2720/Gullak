@@ -44,12 +44,13 @@ async function logToPolygonLedger(userId, txId, action, amount) {
     };
   } catch (err) {
     console.warn(`[Blockchain] ⚠️  Chain write failed (${err.message}). Generating mock receipt.`);
-    const mockHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const crypto = require('crypto');
+    const mockHash = '0x' + crypto.randomBytes(32).toString('hex');
     const mockBlock = Math.floor(17290000 + Math.random() * 9000);
     return {
       txHash: mockHash,
       blockNumber: mockBlock,
-      blockHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+      blockHash: '0x' + crypto.randomBytes(32).toString('hex'),
       from: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
       verified: false, // mark as unverified mock
       network: 'mock',

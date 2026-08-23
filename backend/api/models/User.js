@@ -11,7 +11,6 @@ const UserSchema = new mongoose.Schema({
   },
   auth: {
     passwordHash: { type: String, required: true },
-    salt: { type: String },
     lastLogin: { type: Date },
     loginAttempts: { type: Number, default: 0 },
     isLocked: { type: Boolean, default: false },

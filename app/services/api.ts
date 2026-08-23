@@ -123,7 +123,7 @@ export const apiService = {
     endDate?: string;
   } = {}) {
     const query = new URLSearchParams(
-      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))
+      Object.entries(params).filter(([_, v]) => v !== undefined) as any
     );
     const res = await fetchAPI(`/transactions?${query}`);
     return res.success ? res.data : { transactions: [], pagination: {} };

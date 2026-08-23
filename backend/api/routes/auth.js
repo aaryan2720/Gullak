@@ -34,12 +34,11 @@ router.post('/register', async (req, res) => {
     const userReferralCode = `${shortName}${randNum}`;
 
     // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     user = new User({
       personalInfo: { name, email, phone },
-      auth: { passwordHash, salt },
+      auth: { passwordHash },
       referral: { code: userReferralCode, referredBy: referralCode }
     });
 
