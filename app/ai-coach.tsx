@@ -1,367 +1,290 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { apiService } from './services/api';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { FontFamily } from '@/constants/fonts';
+import { apiService } from '@/app/services/api';
+import ChatBubble, { TypingIndicator } from '@/components/ui/chat-bubble';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  agentUsed?: string;
+  suggestedActions?: string[];
+  timestamp: Date;
+}
+
+const WELCOME_MESSAGE: Message = {
+  id: 'welcome',
+  role: 'assistant',
+  content: "Hi! I'm Gullak AI — your personal finance coach 🪙\n\nI can help you understand your portfolio, plan goals, and make smarter investment decisions. What's on your mind today?",
+  suggestedActions: ['How are my investments doing?', 'Explain round-ups', 'Best goal for me?'],
+  timestamp: new Date(),
+};
+
+const SESSION_ID = `session_${Date.now()}`;
 
 export default function AICoachScreen() {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = Colors[colorScheme ?? 'dark'];
   const router = useRouter();
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      type: 'bot',
-      text: '👋 Hey there! I\'m your AI investment coach. Ask me anything about investing, budgeting, or your goals!',
-      time: 'Just now',
-    },
-  ]);
 
-  const quickActions = [
-    { icon: 'trending-up', label: 'How to invest?', color: '#6C63FF' },
-    { icon: 'pie-chart', label: 'Diversify portfolio', color: '#4CAF50' },
-    { icon: 'bulb', label: 'Save tips', color: '#FFA726' },
-    { icon: 'cash', label: 'Budget help', color: '#2196F3' },
-  ];
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const listRef = useRef<FlatList>(null);
 
-  const handleSend = async () => {
-    const userMessage = message.trim();
-    if (userMessage) {
-      // Add user message
-      setMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        type: 'user',
-        text: userMessage,
-        time: 'Just now',
-      }]);
-      setMessage('');
-      
-      try {
-        // Fetch response from API service
-        const res = await apiService.askAICoach(userMessage, 'moderate');
-        if (res && res.success) {
-          setMessages(prev => [...prev, {
-            id: (Date.now() + 1).toString(),
-            type: 'bot',
-            text: res.response,
-            time: 'Just now',
-          }]);
-        }
-      } catch (err) {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          type: 'bot',
-          text: "🤖 Sorry, I'm having trouble connecting to the AI Coach. Please try again.",
-          time: 'Just now',
-        }]);
+  // Load chat history on mount
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    try {
+      const history = await apiService.getChatHistory();
+      if (history && history.length > 0) {
+        const mapped: Message[] = history.map((m: any) => ({
+          id: m._id,
+          role: m.role,
+          content: m.content,
+          agentUsed: m.agentUsed,
+          suggestedActions: m.suggestedActions,
+          timestamp: new Date(m.createdAt),
+        }));
+        setMessages([WELCOME_MESSAGE, ...mapped]);
       }
+    } catch (e) {
+      // No history yet, welcome message is shown
+    } finally {
+      setHistoryLoaded(true);
     }
   };
 
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      listRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  }, []);
+
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isLoading) return;
+
+    const userMsg: Message = {
+      id: `usr_${Date.now()}`,
+      role: 'user',
+      content: trimmed,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setInputText('');
+    setIsLoading(true);
+    scrollToBottom();
+
+    try {
+      const res = await apiService.chatWithAI(trimmed, SESSION_ID);
+      const aiMsg: Message = {
+        id: `ai_${Date.now()}`,
+        role: 'assistant',
+        content: res.data?.response || res.response || "I'm thinking through that...",
+        agentUsed: res.data?.agentUsed || res.agentUsed,
+        suggestedActions: res.data?.suggestedActions || res.suggestedActions || [],
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiMsg]);
+    } catch (e) {
+      const errMsg: Message = {
+        id: `err_${Date.now()}`,
+        role: 'assistant',
+        content: "I'm having trouble connecting right now. Please check your internet connection and try again.",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errMsg]);
+    } finally {
+      setIsLoading(false);
+      scrollToBottom();
+    }
+  }, [isLoading, scrollToBottom]);
+
+  const renderItem = ({ item }: { item: Message }) => (
+    <ChatBubble
+      role={item.role}
+      content={item.content}
+      agentUsed={item.agentUsed}
+      suggestedActions={item.suggestedActions}
+      timestamp={item.timestamp}
+      onSuggestionPress={(s) => sendMessage(s)}
+    />
+  );
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={isDark ? colors.background : '#0A0E27'} />
+
       {/* Header */}
       <LinearGradient
-        colors={['#6C63FF', '#8F88FF']}
+        colors={isDark ? ['#0D1128', '#111627'] : ['#0A0E27', '#111627']}
         style={styles.header}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <View style={styles.aiIconContainer}>
-            <Ionicons name="sparkles" size={24} color="#FFD700" />
+          <View style={styles.agentAvatar}>
+            <Text style={{ fontSize: 20 }}>🪙</Text>
           </View>
           <View>
-            <Text style={styles.headerTitle}>AI Coach</Text>
-            <View style={styles.statusRow}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Active • Always here to help</Text>
-            </View>
+            <Text style={styles.headerTitle}>Gullak AI Coach</Text>
+            <Text style={styles.headerSub}>Powered by AI + Expert Rules</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.moreButton}>
-          <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
+        <View style={styles.statusDot} />
       </LinearGradient>
 
-      {/* Quick Actions */}
-      <View style={styles.quickActionsContainer}>
-        <Text style={styles.quickActionsTitle}>Quick Ask</Text>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.quickActionsScroll}
-        >
-          {quickActions.map((action, index) => (
-            <TouchableOpacity 
-              key={index}
-              style={[styles.quickActionChip, { borderColor: action.color + '40' }]}
-            >
-              <Ionicons name={action.icon as any} size={18} color={action.color} />
-              <Text style={styles.quickActionText}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
       {/* Messages */}
-      <ScrollView style={styles.messagesContainer}>
-        {messages.map((msg) => (
-          <View 
-            key={msg.id}
-            style={[
-              styles.messageWrapper,
-              msg.type === 'user' ? styles.userMessageWrapper : styles.botMessageWrapper
-            ]}
-          >
-            {msg.type === 'bot' && (
-              <View style={styles.botAvatar}>
-                <Ionicons name="sparkles" size={16} color="#6C63FF" />
-              </View>
-            )}
-            <View 
-              style={[
-                styles.messageBubble,
-                msg.type === 'user' ? styles.userBubble : styles.botBubble
-              ]}
-            >
-              <Text style={[
-                styles.messageText,
-                msg.type === 'user' ? styles.userText : styles.botText
-              ]}>
-                {msg.text}
-              </Text>
-              <Text style={styles.messageTime}>{msg.time}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      {/* Input */}
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={90}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              placeholder="Ask your AI coach anything..."
-              value={message}
-              onChangeText={setMessage}
-              multiline
-              maxLength={500}
+        <FlatList
+          ref={listRef}
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messageList}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={scrollToBottom}
+          ListFooterComponent={isLoading ? <TypingIndicator /> : null}
+        />
+
+        {/* Input Bar */}
+        <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+          <TextInput
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="Ask your AI coach..."
+            placeholderTextColor={colors.textTertiary}
+            style={[styles.input, { color: colors.text, backgroundColor: colors.surfaceVariant }]}
+            multiline
+            maxLength={500}
+            onSubmitEditing={() => sendMessage(inputText)}
+            returnKeyType="send"
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, { backgroundColor: inputText.trim() ? colors.primary : colors.surfaceVariant }]}
+            onPress={() => sendMessage(inputText)}
+            disabled={!inputText.trim() || isLoading}
+          >
+            <Ionicons
+              name={isLoading ? 'hourglass' : 'send'}
+              size={18}
+              color={inputText.trim() ? '#FFFFFF' : colors.textTertiary}
             />
-            <TouchableOpacity 
-              style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
-              onPress={handleSend}
-              disabled={!message.trim()}
-            >
-              <LinearGradient
-                colors={message.trim() ? ['#6C63FF', '#8F88FF'] : ['#CCC', '#DDD']}
-                style={styles.sendGradient}
-              >
-                <Ionicons name="send" size={20} color="#FFFFFF" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F8F8',
-  },
+  root: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingTop: Platform.OS === 'ios' ? 56 : 44,
+    paddingBottom: 16,
+    paddingHorizontal: Spacing.md,
     gap: 12,
   },
-  backButton: {
-    padding: 4,
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerCenter: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-  },
-  aiIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 2,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4CAF50',
-  },
-  statusText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '600',
-  },
-  moreButton: {
-    padding: 4,
-  },
-  quickActionsContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  quickActionsTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#666',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  quickActionsScroll: {
-    paddingHorizontal: 16,
     gap: 10,
   },
-  quickActionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  agentAvatar: {
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    gap: 6,
-  },
-  quickActionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-  },
-  messagesContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  messageWrapper: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 8,
-  },
-  userMessageWrapper: {
-    justifyContent: 'flex-end',
-  },
-  botMessageWrapper: {
-    justifyContent: 'flex-start',
-  },
-  botAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E8E5FF',
-    alignItems: 'center',
+    backgroundColor: '#7B61FF25',
     justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#7B61FF50',
   },
-  messageBubble: {
-    maxWidth: '75%',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
-  },
-  userBubble: {
-    backgroundColor: '#6C63FF',
-    borderBottomRightRadius: 4,
-  },
-  botBubble: {
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 4,
-  },
-  userText: {
+  headerTitle: {
+    fontSize: 16,
     color: '#FFFFFF',
-    fontWeight: '500',
+    fontFamily: FontFamily.bodySemi,
   },
-  botText: {
-    color: '#333',
-    fontWeight: '500',
-  },
-  messageTime: {
+  headerSub: {
     fontSize: 11,
-    color: 'rgba(0, 0, 0, 0.4)',
-    fontWeight: '600',
+    color: 'rgba(255,255,255,0.5)',
+    fontFamily: FontFamily.body,
   },
-  inputContainer: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#00FFB3',
+    borderWidth: 2,
+    borderColor: '#00FFB330',
   },
-  inputWrapper: {
+  messageList: {
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 12,
+    gap: 10,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    borderTopWidth: 0.5,
   },
   input: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
-    borderRadius: 24,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    fontSize: 15,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontFamily: FontFamily.body,
     maxHeight: 100,
-    color: '#333',
+    lineHeight: 20,
   },
-  sendButton: {
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  sendButtonDisabled: {
-    opacity: 0.5,
-  },
-  sendGradient: {
-    width: 48,
-    height: 48,
-    alignItems: 'center',
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
+    alignItems: 'center',
   },
 });

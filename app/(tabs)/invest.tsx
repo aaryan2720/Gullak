@@ -67,7 +67,16 @@ export default function InvestScreen() {
     setCheckoutVisible(false);
     
     // API Call
-    await apiService.investManual(amt, { indexFunds: 60, digitalGold: 30, bonds: 10 });
+    // Record completed investment via new payment verify endpoint (mock mode since paymentId came from old checkout)
+    await apiService.verifyPayment({
+      razorpayOrderId: `order_legacy_${Date.now()}`,
+      razorpayPaymentId: paymentId,
+      razorpaySignature: '',
+      amount: amt,
+      allocation: { indexFunds: 60, digitalGold: 30, bonds: 10 },
+      isMock: true,
+    });
+
 
     // Dynamically update portfolio
     setTotalInvested(prev => prev + amt);

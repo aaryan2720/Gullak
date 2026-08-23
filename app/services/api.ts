@@ -1,294 +1,233 @@
-import { Alert } from 'react-native';
 import Constants from 'expo-constants';
 
 // Automatically detect the host computer's IP address on the local network (for physical device testing with Expo Go)
 const getLocalDevIp = () => {
   const hostUri = Constants.expoConfig?.hostUri;
   if (!hostUri) return 'localhost';
-  
-  // hostUri looks like "192.168.1.50:8081" or "10.0.0.5:8081"
   const ip = hostUri.split(':')[0];
   return ip || 'localhost';
 };
 
 const devIp = getLocalDevIp();
-console.log(`[Gullak API] Local Development Machine IP detected: ${devIp}`);
-
 const API_BASE_URL = `http://${devIp}:5000/api`;
 const AI_BASE_URL = `http://${devIp}:8000/api/ai`;
 
-// In-memory token storage
+console.log(`[Gullak API] Base URL: ${API_BASE_URL}`);
+
+// In-memory token (also backed by AsyncStorage via AuthContext)
 let authToken: string | null = null;
-let currentUser: any | null = null;
 
-// Mock fallback databases (to preserve state locally in-memory if backend is offline)
-let mockPortfolio = {
-  summary: { totalInvested: 0, currentValue: 0, totalReturns: 0, returnPercentage: 0 },
-  holdings: [
-    { instrumentType: 'index_fund', instrumentName: 'Nifty 50 Index Fund', investedAmount: 0, currentValue: 0, returns: 0, returnPercentage: 0, allocation: 60 },
-    { instrumentType: 'digital_gold', instrumentName: 'SafeGold Digital Gold', investedAmount: 0, currentValue: 0, returns: 0, returnPercentage: 0, allocation: 30 },
-    { instrumentType: 'bond', instrumentName: 'HDFC Corp Bonds Fund', investedAmount: 0, currentValue: 0, returns: 0, returnPercentage: 0, allocation: 10 }
-  ],
-  assetAllocation: { equity: 60, debt: 10, gold: 30, other: 0 }
-};
-
-let mockGoals = [
-  { id: 1, title: 'New iPhone', emoji: '📱', color: '#4CAF50', current: 5000, target: 30000, category: 'gadgets', targetDate: '2025-12-31' },
-  { id: 2, title: 'Goa Trip', emoji: '🌴', color: '#FF9800', current: 1500, target: 15000, category: 'travel', targetDate: '2025-10-31' }
-];
-
-export const setToken = (token: string | null) => {
-  authToken = token;
-};
-
-export const getToken = () => authToken;
-
-// Helper to make API requests with automatic JWT headers
+// Helper to make authenticated API requests
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const headers = new Headers(options.headers || {});
-  headers.append('Content-Type', 'application/json');
-  if (authToken) {
-    headers.append('Authorization', `Bearer ${authToken}`);
+  if (!(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
   }
-
+  if (authToken) {
+    headers.set('Authorization', `Bearer ${authToken}`);
+  }
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
-  
   try {
     const response = await fetch(url, { ...options, headers });
     const json = await response.json();
     return json;
-  } catch (error) {
-    console.log(`Connection to ${url} failed. Offline fallback mode active.`);
+  } catch (error: any) {
+    console.warn(`[API] Request to ${url} failed: ${error.message}`);
     throw error;
   }
 }
 
 export const apiService = {
-  // 1. AUTHENTICATION
+  // Token management (called by AuthContext)
+  setToken(token: string | null) {
+    authToken = token;
+  },
+  getToken() {
+    return authToken;
+  },
+
+  // ═══════════════════════════════════════
+  // AUTH
+  // ═══════════════════════════════════════
   async register(name: string, email: string, phone: string, password: string) {
-    try {
-      const res = await fetchAPI('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({ name, email, phone, password })
-      });
-      if (res.success) {
-        authToken = res.data.token;
-        currentUser = res.data.user;
-      }
-      return res;
-    } catch (err) {
-      // Local fallback registration
-      authToken = 'mock_jwt_token_gullak_' + Math.random().toString();
-      currentUser = { id: 'usr_mock', name, email, phone, kycStatus: 'pending' };
-      return {
-        success: true,
-        data: { token: authToken, user: currentUser }
-      };
-    }
+    return fetchAPI('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, phone, password }),
+    });
   },
 
   async login(identifier: string, password: string) {
-    try {
-      const res = await fetchAPI('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ identifier, password })
-      });
-      if (res.success) {
-        authToken = res.data.token;
-        currentUser = res.data.user;
-      }
-      return res;
-    } catch (err) {
-      // Local fallback login
-      authToken = 'mock_jwt_token_gullak_login';
-      currentUser = { id: 'usr_mock', name: 'Rahul Sharma', email: 'rahul@example.com', phone: '+919876543210', kycStatus: 'verified' };
-      return {
-        success: true,
-        data: { token: authToken, user: currentUser }
-      };
-    }
+    return fetchAPI('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ identifier, password }),
+    });
   },
 
-  // 2. PORTFOLIO & INVESTMENTS
+  async getMe() {
+    return fetchAPI('/users/me');
+  },
+
+  // ═══════════════════════════════════════
+  // PORTFOLIO & INVESTMENTS
+  // ═══════════════════════════════════════
   async getPortfolio() {
-    try {
-      const res = await fetchAPI('/invest/portfolio');
-      if (res.success) {
-        // Sync local mock database with database results
-        mockPortfolio = res.data;
-        return res.data;
-      }
-      return mockPortfolio;
-    } catch (err) {
-      return mockPortfolio;
-    }
+    const res = await fetchAPI('/invest/portfolio');
+    return res.success ? res.data : null;
   },
 
-  async investManual(amount: number, allocation: any, goalId?: number | string) {
-    try {
-      const res = await fetchAPI('/invest/manual', {
-        method: 'POST',
-        body: JSON.stringify({ amount, allocation, goalId })
-      });
-      if (res.success && !goalId) {
-        // Sync portfolio summary locally
-        mockPortfolio.summary.totalInvested += amount;
-        mockPortfolio.summary.currentValue = mockPortfolio.summary.totalInvested * 1.05;
-        mockPortfolio.summary.totalReturns = mockPortfolio.summary.currentValue - mockPortfolio.summary.totalInvested;
-        mockPortfolio.summary.returnPercentage = 5.0;
-      }
-      return res;
-    } catch (err) {
-      // Local fallback calculation
-      mockPortfolio.summary.totalInvested += amount;
-      mockPortfolio.summary.currentValue = mockPortfolio.summary.totalInvested * 1.05;
-      mockPortfolio.summary.totalReturns = mockPortfolio.summary.currentValue - mockPortfolio.summary.totalInvested;
-      mockPortfolio.summary.returnPercentage = 5.0;
-      
-      if (goalId) {
-        const goalIndex = mockGoals.findIndex(g => g.id === goalId);
-        if (goalIndex !== -1) {
-          mockGoals[goalIndex].current += amount;
-        }
-      }
-
-      const mockHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-      return {
-        success: true,
-        data: {
-          transactionId: 'txn_mock_' + Math.random().toString(36).substring(7),
-          amount,
-          status: 'completed',
-          razorpayPaymentId: 'pay_Gullak_mock_' + Math.random().toString(36).substring(7).toUpperCase(),
-          blockchainReceipt: {
-            txHash: mockHash,
-            blockNumber: 17290145,
-            verified: true
-          }
-        }
-      };
-    }
+  async getPortfolioHistory(period: '1W' | '1M' | '3M' | '1Y' = '1M') {
+    const res = await fetchAPI(`/invest/portfolio/history?period=${period}`);
+    return res.success ? res.data : [];
   },
 
-  // 3. GOALS
+  // ═══════════════════════════════════════
+  // PAYMENTS (Real Razorpay flow)
+  // ═══════════════════════════════════════
+  async createPaymentOrder(amount: number, notes: Record<string, string> = {}) {
+    return fetchAPI('/payments/create-order', {
+      method: 'POST',
+      body: JSON.stringify({ amount, notes }),
+    });
+  },
+
+  async verifyPayment(params: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+    amount: number;
+    goalId?: string;
+    allocation?: any;
+    isMock?: boolean;
+  }) {
+    return fetchAPI('/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    });
+  },
+
+  async getPaymentHistory(page = 1, limit = 20) {
+    const res = await fetchAPI(`/payments/history?page=${page}&limit=${limit}`);
+    return res.success ? res.data : { transactions: [], pagination: {} };
+  },
+
+  // ═══════════════════════════════════════
+  // TRANSACTIONS
+  // ═══════════════════════════════════════
+  async getTransactions(params: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    category?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+  } = {}) {
+    const query = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)]))
+    );
+    const res = await fetchAPI(`/transactions?${query}`);
+    return res.success ? res.data : { transactions: [], pagination: {} };
+  },
+
+  async getTransaction(id: string) {
+    const res = await fetchAPI(`/transactions/${id}`);
+    return res.success ? res.data : null;
+  },
+
+  async getWeeklySummary() {
+    const res = await fetchAPI('/transactions/summary/weekly');
+    return res.success ? res.data : { weeklyInvested: 0, weeklyRoundUps: 0, roundUpCount: 0 };
+  },
+
+  // ═══════════════════════════════════════
+  // GOALS
+  // ═══════════════════════════════════════
   async getGoals() {
-    try {
-      const res = await fetchAPI('/goals');
-      if (res.success) {
-        // Map database schema values to goals components
-        const mappedGoals = res.data.map((g: any) => ({
-          id: g._id,
-          title: g.title,
-          emoji: g.emoji,
-          color: g.color,
-          current: g.financial.currentAmount,
-          target: g.financial.targetAmount,
-          category: g.category,
-          targetDate: g.timeline.targetDate
-        }));
-        return mappedGoals;
-      }
-      return mockGoals;
-    } catch (err) {
-      return mockGoals;
-    }
+    const res = await fetchAPI('/goals');
+    if (!res.success) return [];
+    return res.data.map((g: any) => ({
+      id: g._id,
+      title: g.title,
+      emoji: g.emoji,
+      color: g.color,
+      current: g.financial?.currentAmount || 0,
+      target: g.financial?.targetAmount || 0,
+      category: g.category,
+      targetDate: g.timeline?.targetDate,
+      status: g.status,
+    }));
   },
 
-  async createGoal(title: string, targetAmount: number, targetDate: string, category: string, emoji: string, color: string) {
-    try {
-      const res = await fetchAPI('/goals', {
-        method: 'POST',
-        body: JSON.stringify({ title, targetAmount, targetDate, category, emoji, color })
-      });
-      return res;
-    } catch (err) {
-      // Local fallback create
-      const newGoal = {
-        id: mockGoals.length + 1,
-        title,
-        emoji,
-        color,
-        current: 0,
-        target: targetAmount,
-        category,
-        targetDate
-      };
-      mockGoals.push(newGoal);
-      return { success: true, data: newGoal };
-    }
+  async createGoal(data: {
+    title: string;
+    targetAmount: number;
+    targetDate: string;
+    category: string;
+    emoji: string;
+    color: string;
+  }) {
+    return fetchAPI('/goals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   },
 
-  async contributeGoal(goalId: number | string, amount: number) {
-    try {
-      const res = await fetchAPI(`/goals/${goalId}/contribute`, {
-        method: 'POST',
-        body: JSON.stringify({ amount })
-      });
-      return res;
-    } catch (err) {
-      const goalIndex = mockGoals.findIndex(g => g.id === goalId);
-      if (goalIndex !== -1) {
-        mockGoals[goalIndex].current += amount;
-      }
-      return { success: true };
-    }
+  async contributeGoal(goalId: string, amount: number, paymentDetails?: any) {
+    return fetchAPI(`/goals/${goalId}/contribute`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, ...paymentDetails }),
+    });
   },
 
-  // 4. CHAT AI COACH
-  async askAICoach(message: string, riskProfile: string) {
-    try {
-      // Package payload context for AI processing
-      const payload = {
-        message,
-        userId: currentUser?.id || 'usr_mock',
-        riskProfile,
-        portfolio: {
-          totalInvested: mockPortfolio.summary.totalInvested,
-          currentValue: mockPortfolio.summary.currentValue,
-          totalReturns: mockPortfolio.summary.totalReturns,
-          returnPercentage: mockPortfolio.summary.returnPercentage
-        },
-        goals: mockGoals.map(g => ({
-          title: g.title,
-          targetAmount: g.target,
-          currentAmount: g.current,
-          targetDate: g.targetDate
-        }))
-      };
+  async deleteGoal(goalId: string) {
+    return fetchAPI(`/goals/${goalId}`, { method: 'DELETE' });
+  },
 
-      const response = await fetch(`${AI_BASE_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const res = await response.json();
-      return res;
-    } catch (err) {
-      // Local rule-based AI fallback client-side if AI server is offline
-      const query_lower = message.toLowerCase();
-      let response_text = "";
-      let suggested: string[] = [];
+  // ═══════════════════════════════════════
+  // AI INSIGHTS & CHAT
+  // ═══════════════════════════════════════
+  async chatWithAI(message: string, sessionId?: string) {
+    return fetchAPI('/insights/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, sessionId }),
+    });
+  },
 
-      if (["hi", "hello", "hey", "gullak"].some(w => query_lower.includes(w))) {
-        response_text = `Hello! I am your Gullak AI Advisor. Based on your ${riskProfile} risk profile, I can help you optimize your portfolio, suggest goal contributions, or explain financial concepts. What's on your mind today?`;
-        suggested = ["Show my returns summary", "Am I on track for my goals?", "Explain mutual funds"];
-      } else if (["portfolio", "returns", "invested", "investment", "money"].some(w => query_lower.includes(w))) {
-        response_text = `Your portfolio is looking healthy! You have invested a total of ₹${mockPortfolio.summary.totalInvested.toLocaleString()}, which is currently valued at ₹${mockPortfolio.summary.currentValue.toLocaleString()}. This represents a return of ₹${mockPortfolio.summary.totalReturns.toLocaleString()} (${mockPortfolio.summary.returnPercentage}%). Given your ${riskProfile} profile, I suggest keeping 60% in Nifty Index Funds, 30% in Digital Gold, and 10% in Corporate Bonds.`;
-        suggested = ["How do round-ups work?", "Set up an auto-invest rule"];
-      } else if (["goal", "target", "iphone", "vacation", "save"].some(w => query_lower.includes(w))) {
-        response_text = "I see your active goals. To reach these targets faster, I suggest setting up a weekly Auto-Contribute of ₹100. Based on your spending, you can easily save an extra ₹400/month by enabling the Auto Round-up agent!";
-        suggested = ["Create a new goal", "What are suggested goals for Gen-Z?"];
-      } else {
-        response_text = `Interesting question! Under your ${riskProfile} risk profile, my main recommendation is to maintain disciplined micro-savings. Saving just ₹20 daily through round-ups adds up to ₹7,300/year, compounding at an average of 12% in index funds. How else can I assist your financial journey?`;
-        suggested = ["Show my returns summary", "Explain Digital Gold"];
-      }
+  async getChatHistory(sessionId?: string, page = 1) {
+    const query = sessionId ? `?sessionId=${sessionId}&page=${page}` : `?page=${page}`;
+    const res = await fetchAPI(`/insights/history${query}`);
+    return res.success ? res.data : [];
+  },
 
-      return {
-        success: true,
-        response: response_text,
-        agentUsed: "Local Failover Client Agent",
-        suggestedActions: suggested
-      };
-    }
-  }
+  async getWeeklyInsight() {
+    const res = await fetchAPI('/insights/weekly');
+    return res.success ? res.data : null;
+  },
+
+  // ═══════════════════════════════════════
+  // USER PROFILE & STATS
+  // ═══════════════════════════════════════
+  async getUserStats() {
+    const res = await fetchAPI('/users/stats');
+    return res.success ? res.data : null;
+  },
+
+  async updateProfile(updates: { name?: string; avatar?: string; riskProfile?: string }) {
+    return fetchAPI('/users/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+  },
+
+  async getReferralInfo() {
+    const res = await fetchAPI('/users/referral');
+    return res.success ? res.data : null;
+  },
+
+  async getBlockchainAudit(page = 1) {
+    const res = await fetchAPI(`/users/blockchain-audit?page=${page}`);
+    return res.success ? res.data : { events: [], pagination: {} };
+  },
 };
+
+export default apiService;
