@@ -1,104 +1,104 @@
-import { useCallback, useEffect, useState } from 'react';
-import { apiService } from '@/app/services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { apiService } from '../services/api';
 
-export interface Transaction {
+interface Transaction {
   _id: string;
   type: 'debit' | 'credit' | 'investment' | 'withdrawal';
   category: 'round_up' | 'manual' | 'auto_invest' | 'goal_contribution';
   amount: number;
   currency: string;
-  source: { type: string; transactionId?: string };
-  destination: { type: string; goalId?: { _id: string; title: string; emoji: string } };
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  blockchainReceipt?: { txHash: string; blockNumber: number; verified: boolean };
-  metadata?: { description?: string; merchantName?: string; notes?: string };
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'reversed';
   createdAt: string;
+  metadata?: {
+    merchantName?: string;
+    description?: string;
+    notes?: string;
+  };
+  destination?: {
+    goalId?: {
+      _id: string;
+      title: string;
+      emoji: string;
+      color: string;
+    };
+  };
+  blockchainReceipt?: {
+    txHash?: string;
+    blockNumber?: number;
+    verified?: boolean;
+  };
 }
 
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-}
-
-interface UseTransactionsOptions {
+interface UseTransactionsProps {
   type?: string;
   category?: string;
   status?: string;
-  autoLoad?: boolean;
+  limit?: number;
 }
 
-export function useTransactions(options: UseTransactionsOptions = {}) {
+export function useTransactions(props: UseTransactionsProps = {}) {
+  const { type, category, status, limit = 20 } = props;
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 0 });
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPage = useCallback(async (page: number, reset = false) => {
-    if (page === 1) {
-      reset ? setIsRefreshing(true) : setIsLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
-    setError(null);
+  const fetchTransactions = useCallback(
+    async (pageNum: number, clearPrevious = false) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await apiService.getTransactions({
+          page: pageNum,
+          limit,
+          type,
+          category,
+          status,
+        });
 
-    try {
-      const data = await apiService.getTransactions({
-        page,
-        limit: 20,
-        type: options.type,
-        category: options.category,
-        status: options.status,
-      });
-
-      const txList: Transaction[] = data.transactions || [];
-      const pg: Pagination = data.pagination || { page, limit: 20, total: 0, pages: 1 };
-
-      if (page === 1 || reset) {
-        setTransactions(txList);
-      } else {
-        setTransactions(prev => [...prev, ...txList]);
+        const newTxs = data.transactions || [];
+        setTransactions((prev) => {
+          if (clearPrevious || pageNum === 1) return newTxs;
+          return [...prev, ...newTxs];
+        });
+        setHasMore(pageNum < (data.pagination?.pages || 1));
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch transactions');
+      } finally {
+        setIsLoading(false);
       }
-      setPagination(pg);
-    } catch (e: any) {
-      setError(e?.message || 'Failed to load transactions');
-    } finally {
-      setIsLoading(false);
-      setIsLoadingMore(false);
-      setIsRefreshing(false);
-    }
-  }, [options.type, options.category, options.status]);
+    },
+    [type, category, status, limit]
+  );
 
   useEffect(() => {
-    if (options.autoLoad !== false) {
-      fetchPage(1);
-    }
-  }, [options.type, options.category, options.status]);
+    setPage(1);
+    fetchTransactions(1, true);
+  }, [type, category, status]);
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
-    await fetchPage(1, true);
-  }, [fetchPage]);
+    setPage(1);
+    await fetchTransactions(1, true);
+    setIsRefreshing(false);
+  }, [fetchTransactions]);
 
-  const loadMore = useCallback(() => {
-    if (isLoadingMore || pagination.page >= pagination.pages) return;
-    fetchPage(pagination.page + 1);
-  }, [isLoadingMore, pagination, fetchPage]);
-
-  const hasMore = pagination.page < pagination.pages;
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    await fetchTransactions(nextPage, false);
+  }, [page, hasMore, isLoading, fetchTransactions]);
 
   return {
     transactions,
-    pagination,
     isLoading,
-    isLoadingMore,
     isRefreshing,
+    hasMore,
     error,
     refresh,
     loadMore,
-    hasMore,
   };
 }

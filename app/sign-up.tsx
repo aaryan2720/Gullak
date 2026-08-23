@@ -1,37 +1,48 @@
-import Button from '@/components/ui/button';
-import Input from '@/components/ui/input';
-import { Colors, Spacing } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { apiService } from './services/api';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+
+import Button from '@/components/ui/button';
+import Input from '@/components/ui/input';
+import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/app/context/auth-context';
+import { FontFamily } from '@/constants/fonts';
 
 export default function SignUpPage() {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const colors = Colors[colorScheme ?? 'dark'];
+  const { register, isAuthenticated } = useAuth();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated]);
 
   const handleSignUp = async () => {
-    if (!name || !email || !phone || !password) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -39,162 +50,152 @@ export default function SignUpPage() {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-    const res = await apiService.register(name, email, phone, password);
+    setLoading(true);
+    const res = await register(name, email, phone, password);
+    setLoading(false);
     if (res.success) {
       router.replace('/(tabs)');
     } else {
-      Alert.alert('Registration Failed', res.error?.message || 'Verification failed');
+      Alert.alert('Registration Failed', res.error || 'Failed to create account.');
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: '#0A0E27' }]} edges={['top']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
         <StatusBar barStyle="light-content" />
         
         {/* Header with Gradient */}
         <LinearGradient
-          colors={['#FF6584', '#FF8AA3']}
+          colors={['#0D1128', '#1A1040', '#0D1128']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
         >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#FFF" />
+          </TouchableOpacity>
+
+          <View style={styles.headerContent}>
+            <View style={[styles.logoCircle, { backgroundColor: colors.secondary + '25', borderColor: colors.secondary + '60', borderWidth: 1.5 }]}>
+              <Text style={{ fontSize: 32 }}>🚀</Text>
+            </View>
+            <Text style={styles.headerTitle}>Join Gullak</Text>
+            <Text style={styles.headerSubtitle}>Start your investing journey today!</Text>
+          </View>
+        </LinearGradient>
+
+        {/* Form Section */}
+        <ScrollView
+          style={[styles.formSection, { backgroundColor: colors.background }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
-        </TouchableOpacity>
+          <View style={styles.formContainer}>
+            <Text style={[styles.formTitle, { color: colors.text }]}>Create Account</Text>
+            <Text style={[styles.formSubtitle, { color: colors.textSecondary }]}>
+              Fill in your details to get started
+            </Text>
 
-        <View style={styles.headerContent}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="rocket" size={32} color="#FFF" />
-          </View>
-          <Text style={styles.headerTitle}>Join Grow-Z</Text>
-          <Text style={styles.headerSubtitle}>Start your investing journey today!</Text>
-        </View>
-      </LinearGradient>
-
-      {/* Form Section */}
-      <ScrollView
-        style={styles.formSection}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.formContainer}>
-          <Text style={styles.formTitle}>Create Account</Text>
-          <Text style={styles.formSubtitle}>
-            Fill in your details to get started
-          </Text>
-
-          {/* Benefits Cards */}
-          <View style={styles.benefitsContainer}>
-            <View style={styles.benefitCard}>
-              <Ionicons name="gift-outline" size={20} color="#6C63FF" />
-              <Text style={styles.benefitText}>₹100 Bonus</Text>
+            {/* Benefits Cards */}
+            <View style={styles.benefitsContainer}>
+              <View style={[styles.benefitCard, { backgroundColor: colors.surfaceVariant }]}>
+                <Ionicons name="gift-outline" size={18} color={colors.primary} />
+                <Text style={[styles.benefitText, { color: colors.text }]}>₹100 Bonus</Text>
+              </View>
+              <View style={[styles.benefitCard, { backgroundColor: colors.surfaceVariant }]}>
+                <Ionicons name="shield-checkmark-outline" size={18} color={colors.success} />
+                <Text style={[styles.benefitText, { color: colors.text }]}>100% Safe</Text>
+              </View>
+              <View style={[styles.benefitCard, { backgroundColor: colors.surfaceVariant }]}>
+                <Ionicons name="flash-outline" size={18} color={colors.warning} />
+                <Text style={[styles.benefitText, { color: colors.text }]}>2 Min Setup</Text>
+              </View>
             </View>
-            <View style={styles.benefitCard}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#4CAF50" />
-              <Text style={styles.benefitText}>100% Safe</Text>
+
+            <View style={styles.inputContainer}>
+              <Input
+                label="Full Name"
+                placeholder="John Doe"
+                value={name}
+                onChangeText={setName}
+                leftIcon="person-outline"
+              />
+
+              <Input
+                label="Email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChangeText={setEmail}
+                leftIcon="mail-outline"
+                keyboardType="email-address"
+              />
+
+              <Input
+                label="Phone Number"
+                placeholder="+91 98765 43210"
+                value={phone}
+                onChangeText={setPhone}
+                leftIcon="call-outline"
+                keyboardType="phone-pad"
+              />
+
+              <Input
+                label="Password"
+                placeholder="Create a strong password"
+                value={password}
+                onChangeText={setPassword}
+                leftIcon="lock-closed-outline"
+                secureTextEntry
+              />
+
+              <Input
+                label="Confirm Password"
+                placeholder="Re-enter your password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                leftIcon="lock-closed-outline"
+                secureTextEntry
+              />
             </View>
-            <View style={styles.benefitCard}>
-              <Ionicons name="flash-outline" size={20} color="#FFA726" />
-              <Text style={styles.benefitText}>Start in 2 min</Text>
+
+            <Button
+              variant="primary"
+              size="lg"
+              onPress={handleSignUp}
+              style={styles.signUpButton}
+              title={loading ? 'Registering...' : 'Create Account'}
+              disabled={loading}
+            />
+
+            {/* Divider */}
+            <View style={styles.dividerContainer}>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+              <Text style={[styles.dividerText, { color: colors.textSecondary }]}>OR</Text>
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
             </View>
-          </View>
 
-          <View style={styles.inputContainer}>
-            <Input
-              label="Full Name"
-              placeholder="John Doe"
-              value={name}
-              onChangeText={setName}
-              leftIcon={<Ionicons name="person-outline" size={20} color={colors.textSecondary} />}
-            />
-
-            <Input
-              label="Email"
-              placeholder="your.email@example.com"
-              value={email}
-              onChangeText={setEmail}
-              leftIcon={<Ionicons name="mail-outline" size={20} color={colors.textSecondary} />}
-              keyboardType="email-address"
-            />
-
-            <Input
-              label="Phone Number"
-              placeholder="+91 98765 43210"
-              value={phone}
-              onChangeText={setPhone}
-              leftIcon={<Ionicons name="call-outline" size={20} color={colors.textSecondary} />}
-              keyboardType="phone-pad"
-            />
-
-            <Input
-              label="Password"
-              placeholder="Create a strong password"
-              value={password}
-              onChangeText={setPassword}
-              leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />}
-              secureTextEntry
-            />
-
-            <Input
-              label="Confirm Password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} />}
-              secureTextEntry
-            />
-          </View>
-
-          <Button
-            variant="primary"
-            size="lg"
-            onPress={handleSignUp}
-            style={styles.signUpButton}
-            title="Create Account"
-          />
-
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
-
-          {/* Social Signup Buttons */}
-          <TouchableOpacity style={styles.socialButton} onPress={handleSignUp}>
-            <Ionicons name="logo-google" size={20} color="#EA4335" />
-            <Text style={styles.socialButtonText}>Sign up with Google</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.socialButton} onPress={handleSignUp}>
-            <Ionicons name="logo-apple" size={20} color="#000" />
-            <Text style={styles.socialButtonText}>Sign up with Apple</Text>
-          </TouchableOpacity>
-
-          {/* Sign In Link */}
-          <View style={styles.signInContainer}>
-            <Text style={styles.signInText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push('sign-in' as any)}>
-              <Text style={styles.signInLink}>Sign In</Text>
+            {/* Social Signup Buttons */}
+            <TouchableOpacity style={[styles.socialButton, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => {}}>
+              <Ionicons name="logo-google" size={20} color="#EA4335" />
+              <Text style={[styles.socialButtonText, { color: colors.text }]}>Sign up with Google</Text>
             </TouchableOpacity>
-          </View>
 
-          {/* Terms */}
-          <Text style={styles.termsText}>
-            By creating an account, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text>
-            {' '}and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>
-          </Text>
-        </View>
-      </ScrollView>
+            {/* Sign In Link */}
+            <View style={styles.signInContainer}>
+              <Text style={[styles.signInText, { color: colors.textSecondary }]}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.push('sign-in' as any)}>
+                <Text style={[styles.signInLink, { color: colors.primary }]}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -203,25 +204,23 @@ export default function SignUpPage() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FF6584',
   },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   header: {
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingTop: 16,
+    paddingBottom: 36,
     paddingHorizontal: Spacing.lg,
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerContent: {
     alignItems: 'center',
@@ -230,70 +229,66 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '800',
+    fontSize: 26,
     color: '#FFFFFF',
-    marginBottom: 8,
+    fontFamily: FontFamily.heading,
+    marginBottom: 6,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontFamily: FontFamily.body,
   },
   formSection: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -30,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    marginTop: -20,
   },
   formContainer: {
     padding: Spacing.lg,
-    paddingTop: 32,
+    paddingTop: 28,
   },
   formTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.light.text,
-    marginBottom: 8,
+    fontSize: 22,
+    fontFamily: FontFamily.heading,
+    marginBottom: 6,
   },
   formSubtitle: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    marginBottom: 16,
+    fontSize: 13,
+    fontFamily: FontFamily.body,
+    marginBottom: 20,
   },
   benefitsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   benefitCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.light.surfaceVariant,
-    borderRadius: 12,
+    borderRadius: BorderRadius.md,
     paddingVertical: 10,
     paddingHorizontal: 8,
     marginHorizontal: 4,
   },
   benefitText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.light.text,
+    fontSize: 11,
+    fontFamily: FontFamily.bodySemi,
     marginLeft: 6,
   },
   inputContainer: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   signUpButton: {
-    marginTop: 8,
+    marginVertical: 8,
   },
   dividerContainer: {
     flexDirection: 'row',
@@ -302,57 +297,39 @@ const styles = StyleSheet.create({
   },
   divider: {
     flex: 1,
-    height: 1,
-    backgroundColor: Colors.light.border,
+    height: 0.5,
   },
   dividerText: {
     marginHorizontal: 16,
     fontSize: 12,
-    color: Colors.light.textSecondary,
-    fontWeight: '600',
+    fontFamily: FontFamily.bodySemi,
   },
   socialButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.light.surface,
     borderWidth: 1,
-    borderColor: Colors.light.border,
-    borderRadius: 12,
+    borderRadius: BorderRadius.md,
     paddingVertical: 14,
     marginBottom: 12,
   },
   socialButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.light.text,
+    fontSize: 14,
+    fontFamily: FontFamily.bodySemi,
     marginLeft: 12,
   },
   signInContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: 18,
+    marginBottom: 24,
   },
   signInText: {
     fontSize: 14,
-    color: Colors.light.textSecondary,
+    fontFamily: FontFamily.body,
   },
   signInLink: {
     fontSize: 14,
-    color: Colors.light.primary,
-    fontWeight: '700',
-  },
-  termsText: {
-    fontSize: 12,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    lineHeight: 18,
-    paddingHorizontal: 16,
-    marginBottom: 32,
-  },
-  termsLink: {
-    color: Colors.light.primary,
-    fontWeight: '600',
+    fontFamily: FontFamily.bodySemi,
   },
 });
