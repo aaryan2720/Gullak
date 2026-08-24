@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../services/api';
+import { apiService } from '../app/services/api';
 
 interface Transaction {
   _id: string;
@@ -102,3 +102,5 @@ export function useTransactions(props: UseTransactionsProps = {}) {
     loadMore,
   };
 }
+
+export default useTransactions;

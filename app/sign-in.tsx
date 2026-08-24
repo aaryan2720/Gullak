@@ -15,13 +15,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { safeStorage } from './services/storage';
 
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/app/context/auth-context';
+import { useAuth } from '@/context/auth-context';
 import { FontFamily } from '@/constants/fonts';
 
 const BIOMETRIC_EMAIL_KEY = '@gullak_biometric_email';
@@ -57,7 +57,7 @@ export default function SignInPage() {
 
   const loadSavedEmail = async () => {
     try {
-      const savedEmail = await AsyncStorage.getItem(BIOMETRIC_EMAIL_KEY);
+      const savedEmail = await safeStorage.getItem(BIOMETRIC_EMAIL_KEY);
       if (savedEmail) {
         setEmail(savedEmail);
       }
@@ -77,8 +77,8 @@ export default function SignInPage() {
     if (res.success) {
       // Save credentials for biometrics future login
       try {
-        await AsyncStorage.setItem(BIOMETRIC_EMAIL_KEY, email);
-        await AsyncStorage.setItem(BIOMETRIC_PASSWORD_KEY, password);
+        await safeStorage.setItem(BIOMETRIC_EMAIL_KEY, email);
+        await safeStorage.setItem(BIOMETRIC_PASSWORD_KEY, password);
       } catch (e) {
         console.warn('Failed to persist biometric keys');
       }
@@ -90,8 +90,8 @@ export default function SignInPage() {
 
   const handleBiometricAuth = async () => {
     try {
-      const savedEmail = await AsyncStorage.getItem(BIOMETRIC_EMAIL_KEY);
-      const savedPassword = await AsyncStorage.getItem(BIOMETRIC_PASSWORD_KEY);
+      const savedEmail = await safeStorage.getItem(BIOMETRIC_EMAIL_KEY);
+      const savedPassword = await safeStorage.getItem(BIOMETRIC_PASSWORD_KEY);
 
       if (!savedEmail || !savedPassword) {
         Alert.alert('Not Enabled', 'Please sign in manually with email and password first to enable biometric authentication.');

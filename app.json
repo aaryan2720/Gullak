@@ -21,7 +21,9 @@
       "permissions": [
         "USE_BIOMETRIC",
         "USE_FINGERPRINT",
-        "CAMERA"
+        "CAMERA",
+        "READ_SMS",
+        "RECEIVE_SMS"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#080C1E",

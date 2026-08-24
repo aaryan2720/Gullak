@@ -22,8 +22,8 @@ import { useRouter } from 'expo-router';
 import GlowCard from '@/components/ui/glow-card';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/app/context/auth-context';
-import { usePortfolio } from '@/app/context/portfolio-context';
+import { useAuth } from '@/context/auth-context';
+import { usePortfolio } from '@/context/portfolio-context';
 import { apiService } from '@/app/services/api';
 import { FontFamily } from '@/constants/fonts';
 

@@ -19,7 +19,7 @@ import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/app/context/auth-context';
+import { useAuth } from '@/context/auth-context';
 import { FontFamily } from '@/constants/fonts';
 
 export default function SignUpPage() {

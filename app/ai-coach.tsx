@@ -49,12 +49,33 @@ export default function AICoachScreen() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [spendInsight, setSpendInsight] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
 
-  // Load chat history on mount
+  // Load chat history and spending insights on mount
   useEffect(() => {
     loadHistory();
+    loadSpendingInsight();
   }, []);
+
+  const loadSpendingInsight = async () => {
+    try {
+      // Fetch recent 30-day transactions for AI analysis
+      const txData = await apiService.getTransactions({ page: 1, limit: 50 });
+      const txs = (txData?.transactions || []).map((t: any) => ({
+        amount: t.amount,
+        merchant: t.metadata?.merchantName || 'Unknown',
+        category: t.category,
+        date: t.createdAt,
+      }));
+      if (txs.length > 0) {
+        const insight = await apiService.getSpendingAnalysis(txs);
+        if (insight?.insights) setSpendInsight(insight.insights);
+      }
+    } catch (e) {
+      // Insight not available — not critical
+    }
+  };
 
   const loadHistory = async () => {
     try {
@@ -153,7 +174,7 @@ export default function AICoachScreen() {
           </View>
           <View>
             <Text style={styles.headerTitle}>Gullak AI Coach</Text>
-            <Text style={styles.headerSub}>Powered by AI + Expert Rules</Text>
+            <Text style={styles.headerSub}>Powered by Gemini 1.5 Flash ✦</Text>
           </View>
         </View>
         <View style={styles.statusDot} />
@@ -165,6 +186,17 @@ export default function AICoachScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        {/* Gemini Weekly Insight Card */}
+        {spendInsight && (
+          <View style={[styles.insightCard, { backgroundColor: isDark ? 'rgba(123,97,255,0.12)' : 'rgba(123,97,255,0.08)', borderColor: '#7B61FF40' }]}>
+            <View style={styles.insightHeader}>
+              <Text style={styles.insightEmoji}>✦</Text>
+              <Text style={[styles.insightTitle, { color: '#7B61FF' }]}>AI Spending Insight</Text>
+            </View>
+            <Text style={[styles.insightText, { color: colors.text }]}>{spendInsight}</Text>
+          </View>
+        )}
+
         <FlatList
           ref={listRef}
           data={messages}
@@ -287,4 +319,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  insightCard: {
+    margin: Spacing.md,
+    marginBottom: 0,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  insightEmoji: {
+    fontSize: 14,
+    color: '#7B61FF',
+  },
+  insightTitle: {
+    fontFamily: FontFamily.headingSemi,
+    fontSize: 13,
+  },
+  insightText: {
+    fontFamily: FontFamily.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
 });
+

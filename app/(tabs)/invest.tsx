@@ -22,7 +22,7 @@ import GlowCard from '@/components/ui/glow-card';
 import StatCounter from '@/components/ui/stat-counter';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { usePortfolio } from '@/app/context/portfolio-context';
+import { usePortfolio } from '@/context/portfolio-context';
 import { apiService } from '@/app/services/api';
 import { FontFamily } from '@/constants/fonts';
 

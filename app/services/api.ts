@@ -228,6 +228,64 @@ export const apiService = {
     const res = await fetchAPI(`/users/blockchain-audit?page=${page}`);
     return res.success ? res.data : { events: [], pagination: {} };
   },
+
+  // ═══════════════════════════════════════
+  // ROUND-UPS
+  // ═══════════════════════════════════════
+  async ingestSMSTransaction(data: { amount: number; merchant?: string; upiRef?: string; bankName?: string; smsBody?: string; smsTimestamp?: string }) {
+    const res = await fetchAPI('/roundups/sms-ingest', { method: 'POST', body: JSON.stringify(data) });
+    return res.success ? res.data : null;
+  },
+
+  async getRoundUpsPending() {
+    const res = await fetchAPI('/roundups/pending');
+    return res.success ? res.data : { roundUps: [], count: 0 };
+  },
+
+  async getRoundUpsVault() {
+    const res = await fetchAPI('/roundups/vault');
+    return res.success ? res.data : null;
+  },
+
+  async approveRoundUp(id: string) {
+    const res = await fetchAPI(`/roundups/${id}/approve`, { method: 'POST' });
+    return res.success ? res.data : null;
+  },
+
+  async skipRoundUp(id: string) {
+    const res = await fetchAPI(`/roundups/${id}/skip`, { method: 'POST' });
+    return res.success ? res.data : null;
+  },
+
+  async investRoundUpVault(data: { vehicle: 'mutual_fund' | 'gold' | 'auto'; goalId?: string }) {
+    const res = await fetchAPI('/roundups/invest', { method: 'POST', body: JSON.stringify(data) });
+    return res.success ? res.data : null;
+  },
+
+  async getRoundUpsHistory(status?: string, page = 1) {
+    const query = new URLSearchParams(
+      Object.entries({ status, page: String(page) }).filter(([_, v]) => v !== undefined) as any
+    );
+    const res = await fetchAPI(`/roundups/history?${query}`);
+    return res.success ? res.data : { roundUps: [], stats: {} };
+  },
+
+  // ═══════════════════════════════════════
+  // AI SPENDING ANALYSIS
+  // ═══════════════════════════════════════
+  async getSpendingAnalysis(transactions: Array<{ amount: number; merchant: string; category?: string; date: string }>, riskProfile = 'moderate') {
+    try {
+      const response = await fetch(`${AI_BASE_URL}/spending-analysis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: 'user', transactions, riskProfile }),
+      });
+      const json = await response.json();
+      return json.success ? json.data : null;
+    } catch {
+      return null;
+    }
+  },
 };
 
 export default apiService;

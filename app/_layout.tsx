@@ -7,8 +7,8 @@ import { StyleSheet } from 'react-native';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useGullakFonts } from '@/constants/fonts';
-import { AuthProvider } from '@/app/context/auth-context';
-import { PortfolioProvider } from '@/app/context/portfolio-context';
+import { AuthProvider } from '@/context/auth-context';
+import { PortfolioProvider } from '@/context/portfolio-context';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiService } from '../services/api';
+import { safeStorage } from '../app/services/storage';
+import { apiService } from '../app/services/api';
 
 interface User {
   id: string;
@@ -45,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadPersistedSession = async () => {
     try {
       const [savedToken, savedUser] = await Promise.all([
-        AsyncStorage.getItem(TOKEN_KEY),
-        AsyncStorage.getItem(USER_KEY),
+        safeStorage.getItem(TOKEN_KEY),
+        safeStorage.getItem(USER_KEY),
       ]);
       if (savedToken && savedUser) {
         setToken(savedToken);
@@ -67,8 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(newToken);
       setUser(newUser);
       await Promise.all([
-        AsyncStorage.setItem(TOKEN_KEY, newToken),
-        AsyncStorage.setItem(USER_KEY, JSON.stringify(newUser)),
+        safeStorage.setItem(TOKEN_KEY, newToken),
+        safeStorage.setItem(USER_KEY, JSON.stringify(newUser)),
       ]);
       return { success: true };
     }
@@ -82,8 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(newToken);
       setUser(newUser);
       await Promise.all([
-        AsyncStorage.setItem(TOKEN_KEY, newToken),
-        AsyncStorage.setItem(USER_KEY, JSON.stringify(newUser)),
+        safeStorage.setItem(TOKEN_KEY, newToken),
+        safeStorage.setItem(USER_KEY, JSON.stringify(newUser)),
       ]);
       return { success: true };
     }
@@ -95,8 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     apiService.setToken(null);
     await Promise.all([
-      AsyncStorage.removeItem(TOKEN_KEY),
-      AsyncStorage.removeItem(USER_KEY),
+      safeStorage.removeItem(TOKEN_KEY),
+      safeStorage.removeItem(USER_KEY),
     ]);
   };
 
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await apiService.getMe();
     if (res.success) {
       setUser(res.data);
-      await AsyncStorage.setItem(USER_KEY, JSON.stringify(res.data));
+      await safeStorage.setItem(USER_KEY, JSON.stringify(res.data));
     }
   };
 
@@ -129,3 +129,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 }
+export default AuthContext;

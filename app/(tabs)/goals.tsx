@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { FontFamily } from '@/constants/fonts';
-import { useAuth } from '@/app/context/auth-context';
+import { useAuth } from '@/context/auth-context';
 import { apiService } from '@/app/services/api';
 import GlowCard from '@/components/ui/glow-card';
 import GoalRing, { GoalRingLabel } from '@/components/ui/goal-ring';

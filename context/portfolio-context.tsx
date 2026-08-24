@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { apiService } from '../services/api';
+import { apiService } from '../app/services/api';
 import { useAuth } from './auth-context';
 
 interface Holding {
@@ -121,3 +121,5 @@ export function usePortfolio() {
   if (!ctx) throw new Error('usePortfolio must be used inside PortfolioProvider');
   return ctx;
 }
+
+export default PortfolioContext;

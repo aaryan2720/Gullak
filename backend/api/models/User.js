@@ -34,8 +34,12 @@ const UserSchema = new mongoose.Schema({
     },
     roundUp: {
       enabled: { type: Boolean, default: false },
-      roundUpTo: { type: Number, default: 10 },
-      maxPerTransaction: { type: Number, default: 50 }
+      roundUpTo: { type: Number, default: 10 },          // always 10 for now
+      maxPerTransaction: { type: Number, default: 50 },
+      threshold: { type: Number, default: 50 },           // accumulate until this amount before investing
+      preferredVehicle: { type: String, enum: ['mutual_fund', 'gold', 'auto'], default: 'auto' },
+      smsParsingEnabled: { type: Boolean, default: false },
+      vaultBalance: { type: Number, default: 0 },         // accumulated but not yet invested
     },
     notifications: {
       push: { type: Boolean, default: true },

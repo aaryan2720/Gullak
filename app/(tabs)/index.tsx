@@ -18,8 +18,8 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Gradients, BorderRadius, Spacing, Shadows } from '@/constants/theme';
 import { FontFamily } from '@/constants/fonts';
-import { useAuth } from '@/app/context/auth-context';
-import { usePortfolio } from '@/app/context/portfolio-context';
+import { useAuth } from '@/context/auth-context';
+import { usePortfolio } from '@/context/portfolio-context';
 import { apiService } from '@/app/services/api';
 import GlowCard from '@/components/ui/glow-card';
 import StatCounter from '@/components/ui/stat-counter';
@@ -29,10 +29,10 @@ import { PortfolioCardSkeleton, TransactionSkeleton, ListSkeleton } from '@/comp
 const { width } = Dimensions.get('window');
 
 const QUICK_ACTIONS = [
+  { id: 'roundups', icon: 'wallet', label: 'Round-Ups', color: '#00D4AA', route: '/round-ups' as const },
   { id: 'invest', icon: 'trending-up', label: 'Invest', color: '#7B61FF', route: '/(tabs)/invest' as const },
-  { id: 'goals', icon: 'flag', label: 'Goals', color: '#00D4AA', route: '/(tabs)/goals' as const },
-  { id: 'coach', icon: 'chatbubble-ellipses', label: 'AI Coach', color: '#FFD166', route: '/ai-coach' as const },
-  { id: 'history', icon: 'receipt', label: 'History', color: '#FF6B9D', route: '/(tabs)/transactions' as const },
+  { id: 'goals', icon: 'flag', label: 'Goals', color: '#FFD166', route: '/(tabs)/goals' as const },
+  { id: 'coach', icon: 'chatbubble-ellipses', label: 'AI Coach', color: '#FF6B9D', route: '/ai-coach' as const },
 ];
 
 const AGENT_STATES = [
@@ -55,6 +55,8 @@ export default function HomeScreen() {
   const [recentTx, setRecentTx] = useState<any[]>([]);
   const [txLoading, setTxLoading] = useState(true);
   const [weeklySummary, setWeeklySummary] = useState({ weeklyInvested: 0, weeklyRoundUps: 0, roundUpCount: 0 });
+  const [pendingRoundUps, setPendingRoundUps] = useState(0);
+  const [vaultBalance, setVaultBalance] = useState(0);
   const [agentState, setAgentState] = useState(AGENT_STATES[0]);
   const [agentIndex, setAgentIndex] = useState(0);
 
@@ -99,12 +101,16 @@ export default function HomeScreen() {
   const loadData = useCallback(async () => {
     setTxLoading(true);
     try {
-      const [txData, summary] = await Promise.all([
+      const [txData, summary, pendingRes, vaultRes] = await Promise.all([
         apiService.getTransactions({ page: 1, limit: 5 }),
         apiService.getWeeklySummary(),
+        apiService.getRoundUpsPending(),
+        apiService.getRoundUpsVault(),
       ]);
       setRecentTx(txData.transactions || []);
       setWeeklySummary(summary);
+      setPendingRoundUps(pendingRes?.count || 0);
+      setVaultBalance(vaultRes?.vaultBalance || 0);
     } catch (e) {
       setRecentTx([]);
     } finally {
@@ -257,6 +263,31 @@ export default function HomeScreen() {
           </GlowCard>
         </View>
 
+        {/* ── ROUND-UP BANNER ── */}
+        <TouchableOpacity
+          onPress={() => router.push('/round-ups' as any)}
+          style={[styles.roundUpBanner, { backgroundColor: pendingRoundUps > 0 ? '#00D4AA18' : '#7B61FF12', borderColor: pendingRoundUps > 0 ? '#00D4AA40' : '#7B61FF30' }]}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.roundUpIconWrap, { backgroundColor: pendingRoundUps > 0 ? '#00D4AA20' : '#7B61FF20' }]}>
+            <Ionicons name="wallet" size={20} color={pendingRoundUps > 0 ? '#00D4AA' : '#7B61FF'} />
+            {pendingRoundUps > 0 && (
+              <View style={styles.roundUpBadge}>
+                <Text style={styles.roundUpBadgeText}>{pendingRoundUps}</Text>
+              </View>
+            )}
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.roundUpTitle, { color: colors.text }]}>
+              {pendingRoundUps > 0 ? `${pendingRoundUps} Round-Up${pendingRoundUps > 1 ? 's' : ''} Waiting` : 'Round-Up Vault'}
+            </Text>
+            <Text style={[styles.roundUpSub, { color: colors.textSecondary }]}>
+              {vaultBalance > 0 ? `₹${vaultBalance.toFixed(2)} accumulated` : 'Tap to add your first spend'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={pendingRoundUps > 0 ? '#00D4AA' : '#7B61FF'} />
+        </TouchableOpacity>
+
         {/* ── RECENT TRANSACTIONS ── */}
         <View style={styles.sectionPad}>
           <View style={styles.sectionHeader}>
@@ -332,6 +363,52 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scrollContent: { flexGrow: 1 },
+
+  // Round-Up Banner
+  roundUpBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  roundUpIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  roundUpBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF4D6D',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  roundUpBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontFamily: FontFamily.heading,
+  },
+  roundUpTitle: {
+    fontFamily: FontFamily.headingSemi,
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  roundUpSub: {
+    fontFamily: FontFamily.body,
+    fontSize: 12,
+  },
 
   // Hero
   heroGradient: {

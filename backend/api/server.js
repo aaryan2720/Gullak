@@ -26,6 +26,7 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/insights', require('./routes/insights'));
+app.use('/api/roundups', require('./routes/roundups'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -53,6 +54,12 @@ app.get('/', (req, res) => {
       'GET  /api/users/me',
       'POST /api/insights/chat',
       'GET  /api/goals',
+      'POST /api/roundups/sms-ingest',
+      'GET  /api/roundups/pending',
+      'GET  /api/roundups/vault',
+      'POST /api/roundups/:id/approve',
+      'POST /api/roundups/:id/skip',
+      'POST /api/roundups/invest',
     ]
   });
 });
