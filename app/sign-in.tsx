@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as LocalAuthentication from 'expo-local-authentication';
-import { safeStorage } from './services/storage';
+import { safeStorage } from '@/services/storage';
 
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { safeStorage } from '../app/services/storage';
-import { apiService } from '../app/services/api';
+import { safeStorage } from '@/services/storage';
+import { apiService } from '@/services/api';
+
 
 interface User {
   id: string;

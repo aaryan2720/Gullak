@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../app/services/api';
+import { apiService } from '@/services/api';
 
 interface Transaction {
   _id: string;

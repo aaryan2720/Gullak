@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, BorderRadius, Spacing, Shadows, Typography } from '@/constants/theme';
 import { FontFamily } from '@/constants/fonts';
-import { apiService } from '@/app/services/api';
+import { apiService } from '@/services/api';
 
 // Safely import native Razorpay module
 const { RazorpayCheckout } = NativeModules;

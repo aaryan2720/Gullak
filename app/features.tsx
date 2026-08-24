@@ -1,4 +1,4 @@
-﻿import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -59,7 +59,7 @@ export default function FeaturesScreen() {
       icon: 'wallet-outline',
       color: '#4CAF50',
       title: 'Auto Round-up',
-      description: 'AI Agent automatically rounds up every purchase to ₹10 and invests spare change in diversified portfolios.',
+      description: 'AI Agent automatically rounds up every purchase to ?10 and invests spare change in diversified portfolios.',
       benefits: ['AI-powered automation', 'Save effortlessly', 'Grow passively'],
     },
     {
@@ -154,7 +154,7 @@ export default function FeaturesScreen() {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Ionicons name="trending-up" size={20} color="#4CAF50" />
-              <Text style={styles.statValue}>₹10+</Text>
+              <Text style={styles.statValue}>?10+</Text>
               <Text style={styles.statLabel}>Start From</Text>
             </View>
           </View>
@@ -211,7 +211,7 @@ export default function FeaturesScreen() {
               </View>
               <View style={styles.stepInfo}>
                 <Text style={styles.stepTitle}>Shop Normally</Text>
-                <Text style={styles.stepDescription}>Every purchase rounds up to nearest ₹10</Text>
+                <Text style={styles.stepDescription}>Every purchase rounds up to nearest ?10</Text>
               </View>
             </View>
             <View style={styles.stepDivider} />

@@ -6,47 +6,100 @@ const ChatMessage = require('../models/ChatMessage');
 const Portfolio = require('../models/Portfolio');
 const Goal = require('../models/Goal');
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+// ---------------------------------------------------------------------------
+// Helper to call Gemini REST API directly in Node
+// ---------------------------------------------------------------------------
+async function callGemini(prompt, maxTokens = 512) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
 
-// @route    POST /api/insights/chat
-// @desc     Send message to AI Coach and persist conversation
-// @access   Private
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not defined in environment');
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+  const response = await axios.post(url, {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.7,
+      topP: 0.9,
+      maxOutputTokens: maxTokens,
+    }
+  }, {
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 10000
+  });
+
+  const candidates = response.data?.candidates;
+  if (!candidates || candidates.length === 0) {
+    throw new Error('Gemini API returned no candidates');
+  }
+
+  const text = candidates[0].content?.parts?.[0]?.text;
+  if (!text) {
+    throw new Error('Gemini API returned empty text');
+  }
+
+  return text.trim();
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/insights/chat
+// ---------------------------------------------------------------------------
 router.post('/chat', auth, async (req, res) => {
   const { message, sessionId } = req.body;
   if (!message?.trim()) {
     return res.status(400).json({ success: false, error: { code: 'EMPTY_MESSAGE', message: 'Message cannot be empty' } });
   }
 
+  let portfolio = null;
+  let goals = [];
+
   try {
-    // Fetch user context for AI
-    const [portfolio, goals] = await Promise.all([
+    // Fetch context
+    [portfolio, goals] = await Promise.all([
       Portfolio.findOne({ userId: req.user }),
       Goal.find({ userId: req.user, status: 'active' }).limit(5),
     ]);
+  } catch (err) {
+    console.warn('[Insights] Context fetch failed:', err.message);
+  }
 
-    const startTime = Date.now();
+  const goalsText = goals.length > 0
+    ? goals.map(g => `${g.title} (₹${(g.financial?.currentAmount || 0).toFixed(0)}/₹${(g.financial?.targetAmount || 0).toFixed(0)})`).join(', ')
+    : 'None';
 
-    // Call FastAPI AI service
-    const aiResponse = await axios.post(`${AI_SERVICE_URL}/api/ai/chat`, {
-      message,
-      userId: req.user.toString(),
-      riskProfile: portfolio?.riskProfile || 'moderate',
-      portfolio: portfolio ? {
-        totalInvested: portfolio.summary.totalInvested,
-        currentValue: portfolio.summary.currentValue,
-        totalReturns: portfolio.summary.totalReturns,
-        returnPercentage: portfolio.summary.returnPercentage,
-      } : null,
-      goals: goals.map(g => ({
-        title: g.title,
-        targetAmount: g.financial.targetAmount,
-        currentAmount: g.financial.currentAmount,
-        targetDate: g.targetDate,
-      })),
-    }, { timeout: 10000 });
+  const riskProfile = portfolio?.riskProfile || 'moderate';
+  const totalInvested = portfolio?.summary?.totalInvested || 0;
+  const currentValue = portfolio?.summary?.currentValue || 0;
+  const returnPercentage = portfolio?.summary?.returnPercentage || 0;
 
+  const systemPrompt = `You are Gullak AI - a friendly, intelligent personal finance coach for Gen-Z Indians.
+The user has a ${riskProfile} risk profile.
+Portfolio: Invested Rs ${totalInvested.toFixed(2)}, Current Value Rs ${currentValue.toFixed(2)}, Returns ${returnPercentage.toFixed(1)}%.
+Savings goals: ${goalsText}.
+Core product: round-up micro-investing (every spend rounded up to Rs 10, spare change invested in Nifty Index Funds or Digital Gold).
+Be concise (max 3-4 sentences), encouraging, use INR, avoid jargon, suggest actionable next steps.
+Use emojis sparingly. Never mention OpenAI or GPT.`;
+
+  const fullPrompt = `${systemPrompt}\n\nUser: {message}\nGullak AI:`;
+  const startTime = Date.now();
+
+  try {
+    const aiText = await callGemini(fullPrompt);
     const latencyMs = Date.now() - startTime;
-    const aiData = aiResponse.data;
+
+    // Build dynamic suggestions
+    const suggestions = ['Show my portfolio'];
+    const msgLower = message.toLowerCase();
+    if (msgLower.includes('goal')) {
+      suggestions.push('Am I on track for my goals?');
+    } else if (msgLower.includes('round') || msgLower.includes('sms')) {
+      suggestions.push('See my pending round-ups');
+    } else {
+      suggestions.push('How do round-ups work?');
+    }
 
     // Save user message
     await ChatMessage.create({
@@ -54,39 +107,34 @@ router.post('/chat', auth, async (req, res) => {
       sessionId: sessionId || `session_${req.user}_${Date.now()}`,
       role: 'user',
       content: message,
-      portfolioSnapshot: {
-        totalInvested: portfolio?.summary?.totalInvested || 0,
-        currentValue: portfolio?.summary?.currentValue || 0,
-        riskProfile: portfolio?.riskProfile || 'moderate',
-      },
+      portfolioSnapshot: { totalInvested, currentValue, riskProfile },
     });
 
-    // Save AI response
+    // Save AI message
     const saved = await ChatMessage.create({
       userId: req.user,
       sessionId: sessionId || `session_${req.user}_${Date.now()}`,
       role: 'assistant',
-      content: aiData.response,
-      agentUsed: aiData.agentUsed || 'unknown',
-      suggestedActions: aiData.suggestedActions || [],
+      content: aiText,
+      agentUsed: `Gemini (${process.env.GEMINI_MODEL || 'gemini-3.7-flash'})`,
+      suggestedActions: suggestions,
       metadata: { latencyMs },
     });
 
     res.json({
       success: true,
       data: {
-        response: aiData.response,
-        agentUsed: aiData.agentUsed,
-        suggestedActions: aiData.suggestedActions || [],
+        response: aiText,
+        agentUsed: saved.agentUsed,
+        suggestedActions: suggestions,
         messageId: saved._id,
         latencyMs,
       }
     });
-  } catch (err) {
-    console.error('[Insights] AI chat error:', err.message);
 
-    // Return rule-based fallback even when AI service is down
-    const fallback = getRuleBasedFallback(req.body.message);
+  } catch (err) {
+    console.error('[Insights] Gemini call failed:', err.message);
+    const fallback = getRuleBasedFallback(message);
     res.json({
       success: true,
       data: {
@@ -99,9 +147,88 @@ router.post('/chat', auth, async (req, res) => {
   }
 });
 
-// @route    GET /api/insights/history
-// @desc     Get AI chat history for user
-// @access   Private
+// ---------------------------------------------------------------------------
+// POST /api/insights/spending-analysis
+// ---------------------------------------------------------------------------
+router.post('/spending-analysis', auth, async (req, res) => {
+  const { transactions } = req.body;
+  if (!transactions || transactions.length === 0) {
+    return res.json({
+      success: true,
+      data: {
+        insights: "No transaction data available yet. Keep using the app and I'll analyse your spending patterns! 📊",
+        totalSpent: 0,
+        topMerchant: null,
+        topMerchantAmount: 0,
+        topCategory: null,
+        transactionCount: 0,
+      }
+    });
+  }
+
+  let totalSpent = 0;
+  const merchantTotals = {};
+  const categoryTotals = {};
+
+  transactions.forEach(t => {
+    totalSpent += t.amount;
+    merchantTotals[t.merchant] = (merchantTotals[t.merchant] || 0) + t.amount;
+    const cat = t.category || 'other';
+    categoryTotals[cat] = (categoryTotals[cat] || 0) + t.amount;
+  });
+
+  const topMerchant = Object.keys(merchantTotals).reduce((a, b) => merchantTotals[a] > merchantTotals[b] ? a : b, null);
+  const topCategory = Object.keys(categoryTotals).reduce((a, b) => categoryTotals[a] > categoryTotals[b] ? a : b, null);
+  const topMerchantAmount = topMerchant ? merchantTotals[topMerchant] : 0;
+
+  let portfolio = null;
+  try {
+    portfolio = await Portfolio.findOne({ userId: req.user });
+  } catch (err) {
+    console.warn('[Insights] Failed to fetch portfolio for spending analysis:', err.message);
+  }
+  const riskProfile = portfolio?.riskProfile || 'moderate';
+
+  const prompt = `A user spent Rs ${totalSpent.toFixed(0)} across ${transactions.length} transactions this month.
+Top merchant: ${topMerchant || 'unknown'} (Rs ${topMerchantAmount.toFixed(0)}).
+Top category: ${topCategory || 'other'}.
+Risk profile: ${riskProfile}.
+In 2 short sentences max: give one specific saving tip and one encouraging micro-investment insight.
+Use Rs currency. Be friendly and Gen-Z appropriate.`;
+
+  try {
+    const insightText = await callGemini(prompt, 200);
+    res.json({
+      success: true,
+      data: {
+        insights: insightText,
+        totalSpent,
+        topMerchant,
+        topMerchantAmount,
+        topCategory,
+        transactionCount: transactions.length,
+      }
+    });
+  } catch (err) {
+    console.error('[Insights] Gemini spending analysis failed:', err.message);
+    const fallbackInsight = `You spent Rs ${totalSpent.toFixed(0)} this month. Your biggest expense was ${topMerchant || 'unknown'} — try cutting 10% there to boost your investment vault! 💡`;
+    res.json({
+      success: true,
+      data: {
+        insights: fallbackInsight,
+        totalSpent,
+        topMerchant,
+        topMerchantAmount,
+        topCategory,
+        transactionCount: transactions.length,
+      }
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/insights/history
+// ---------------------------------------------------------------------------
 router.get('/history', auth, async (req, res) => {
   const { page = 1, limit = 50, sessionId } = req.query;
   const query = { userId: req.user };
@@ -119,9 +246,9 @@ router.get('/history', auth, async (req, res) => {
   }
 });
 
-// @route    GET /api/insights/weekly
-// @desc     Get AI-generated weekly financial summary
-// @access   Private
+// ---------------------------------------------------------------------------
+// GET /api/insights/weekly
+// ---------------------------------------------------------------------------
 router.get('/weekly', auth, async (req, res) => {
   try {
     const portfolio = await Portfolio.findOne({ userId: req.user });

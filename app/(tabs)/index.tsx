@@ -20,7 +20,7 @@ import { Colors, Gradients, BorderRadius, Spacing, Shadows } from '@/constants/t
 import { FontFamily } from '@/constants/fonts';
 import { useAuth } from '@/context/auth-context';
 import { usePortfolio } from '@/context/portfolio-context';
-import { apiService } from '@/app/services/api';
+import { apiService } from '@/services/api';
 import GlowCard from '@/components/ui/glow-card';
 import StatCounter from '@/components/ui/stat-counter';
 import TransactionCard from '@/components/ui/transaction-card';

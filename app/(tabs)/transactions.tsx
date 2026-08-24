@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { FontFamily } from '@/constants/fonts';
-import { apiService } from '@/app/services/api';
+import { apiService } from '@/services/api';
 import TransactionCard from '@/components/ui/transaction-card';
 import { TransactionSkeleton, ListSkeleton } from '@/components/ui/skeleton-loader';
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { apiService } from '../app/services/api';
+import { apiService } from '@/services/api';
 import { useAuth } from './auth-context';
 
 interface Holding {

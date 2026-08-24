@@ -21,9 +21,9 @@ import { useRouter } from 'expo-router';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { FontFamily } from '@/constants/fonts';
-import { apiService } from '@/app/services/api';
+import { apiService } from '@/services/api';
 import RoundUpCard from '@/components/ui/roundup-card';
-import { createManualTransaction } from '@/app/services/sms-parser';
+import { createManualTransaction } from '@/services/sms-parser';
 
 const TABS = ['Pending', 'History'] as const;
 type Tab = typeof TABS[number];
@@ -167,7 +167,7 @@ export default function RoundUpsScreen() {
       if (res?.amountInvested) {
         Alert.alert(
           '🎉 Investment Successful!',
-          `₹${res.amountInvested.toFixed(2)} invested in ${vehicle === 'gold' ? 'Digital Gold' : 'Nifty Index Fund'}!\n\nBlockchain receipt generated.`,
+          `₹${(res.amountInvested || 0).toFixed(2)} invested in ${vehicle === 'gold' ? 'Digital Gold' : 'Nifty Index Fund'}!\n\nBlockchain receipt generated.`,
           [{ text: 'Great!', onPress: fetchData }]
         );
       }
@@ -219,11 +219,11 @@ export default function RoundUpsScreen() {
           <View style={styles.vaultRow}>
             <View>
               <Text style={styles.vaultLabel}>Vault Balance</Text>
-              <Text style={styles.vaultAmount}>₹{vault.vaultBalance.toFixed(2)}</Text>
-              <Text style={styles.vaultThreshold}>Goal: ₹{vault.threshold}</Text>
+              <Text style={styles.vaultAmount}>₹{(vault.vaultBalance || 0).toFixed(2)}</Text>
+              <Text style={styles.vaultThreshold}>Goal: ₹{vault.threshold || 50}</Text>
             </View>
             <TouchableOpacity
-              onPress={() => vault.canInvest ? setShowInvestSheet(true) : Alert.alert('Not Yet!', `Keep approving round-ups to reach ₹${vault.threshold}. You're at ₹${vault.vaultBalance.toFixed(2)}!`)}
+              onPress={() => vault.canInvest ? setShowInvestSheet(true) : Alert.alert('Not Yet!', `Keep approving round-ups to reach ₹${vault.threshold || 50}. You're at ₹${(vault.vaultBalance || 0).toFixed(2)}!`)}
               style={[styles.investNowBtn, { opacity: vault.canInvest ? 1 : 0.6 }]}
             >
               <Text style={styles.investNowText}>{vault.canInvest ? 'Invest Now →' : 'Keep Going!'}</Text>
@@ -234,24 +234,24 @@ export default function RoundUpsScreen() {
           <View style={styles.progressTrack}>
             <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
           </View>
-          <Text style={styles.progressText}>{vault.progress.toFixed(0)}% of ₹{vault.threshold} threshold</Text>
+          <Text style={styles.progressText}>{(vault.progress || 0).toFixed(0)}% of ₹{vault.threshold || 50} threshold</Text>
         </LinearGradient>
       )}
 
       {/* Stats Row */}
       <View style={[styles.statsRow, { borderBottomColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}>
         <View style={styles.statItem}>
-          <Text style={[styles.statVal, { color: '#00D4AA' }]}>₹{historyStats.totalSaved.toFixed(0)}</Text>
+          <Text style={[styles.statVal, { color: '#00D4AA' }]}>₹{(historyStats?.totalSaved || 0).toFixed(0)}</Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Total Saved</Text>
         </View>
         <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]} />
         <View style={styles.statItem}>
-          <Text style={[styles.statVal, { color: '#7B61FF' }]}>{historyStats.totalRoundUps}</Text>
+          <Text style={[styles.statVal, { color: '#7B61FF' }]}>{historyStats?.totalRoundUps || 0}</Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Round-Ups</Text>
         </View>
         <View style={[styles.statDivider, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]} />
         <View style={styles.statItem}>
-          <Text style={[styles.statVal, { color: '#FFD166' }]}>₹{historyStats.totalInvested.toFixed(0)}</Text>
+          <Text style={[styles.statVal, { color: '#FFD166' }]}>₹{(historyStats?.totalInvested || 0).toFixed(0)}</Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Invested</Text>
         </View>
       </View>

@@ -24,7 +24,7 @@ import { Colors, BorderRadius, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAuth } from '@/context/auth-context';
 import { usePortfolio } from '@/context/portfolio-context';
-import { apiService } from '@/app/services/api';
+import { apiService } from '@/services/api';
 import { FontFamily } from '@/constants/fonts';
 
 interface BlockchainEvent {
