@@ -1,17 +1,36 @@
 import os
+import sys
 import json
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from dotenv import load_dotenv
 
+# Force UTF-8 output on Windows
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 load_dotenv()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Run Gemini init in background so the server starts immediately."""
+    if os.getenv("GEMINI_API_KEY"):
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _init_gemini)
+    else:
+        print("[Gemini] No API key — rule-based fallback active.", flush=True)
+    yield  # server is running
+
 
 app = FastAPI(
     title="Gullak Agentic AI Server",
     description="Gemini-powered multi-agent personal finance advisor",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan,
 )
 
 # CORS configuration
@@ -63,34 +82,43 @@ class SpendingAnalysisRequest(BaseModel):
     riskProfile: Optional[str] = "moderate"
 
 # ---------------------------------------------------------------------------
-# Gemini client initialisation
+# Gemini client — uses interactions.create() API (genai.Client reads env key)
 # ---------------------------------------------------------------------------
-def get_gemini_model():
-    """Return a configured Gemini GenerativeModel or None if key is missing."""
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        return None
+GEMINI_MODEL = "gemini-3.7-flash"
+_gemini_client = None
+
+
+def _init_gemini():
+    """Initialise the Gemini client. No smoke test — just create the client."""
+    global _gemini_client
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config={
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "max_output_tokens": 512,
-            },
-            safety_settings=[
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-            ]
-        )
-        return model
+        from google import genai
+        # genai.Client() reads GEMINI_API_KEY from environment automatically
+        _gemini_client = genai.Client()
+        print(f"[Gemini] Ready — using {GEMINI_MODEL}", flush=True)
+        return True
     except Exception as e:
-        print(f"[Gemini] Init error: {e}")
-        return None
+        print(f"[Gemini] Init failed: {e}", flush=True)
+        _gemini_client = None
+        return False
+
+
+def gemini_generate(prompt: str, max_tokens: int = 512) -> str:
+    """Generate text via interactions.create()."""
+    interaction = _gemini_client.interactions.create(
+        model=GEMINI_MODEL,
+        input=prompt,
+    )
+    return interaction.output_text.strip()
+
+
+def is_gemini_ready() -> bool:
+    return _gemini_client is not None
+
+
+# Initialise will run in FastAPI lifespan (see above)
+
+
 
 # ---------------------------------------------------------------------------
 # Rule-based fallback (no API key needed)
@@ -160,34 +188,29 @@ def get_rule_based_response(
 # ---------------------------------------------------------------------------
 @app.post("/api/ai/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
-    model = get_gemini_model()
-
-    if model:
+    if is_gemini_ready():
         try:
             goals_text = (
-                ", ".join([f"{g.title} (₹{g.currentAmount:.0f}/₹{g.targetAmount:.0f})" for g in request.goals])
+                ", ".join([f"{g.title} (\u20b9{g.currentAmount:.0f}/\u20b9{g.targetAmount:.0f})" for g in request.goals])
                 if request.goals else "None"
             )
             portfolio_snapshot = request.portfolio
 
             system_prompt = (
-                f"You are Gullak AI — a friendly, intelligent personal finance coach for Gen-Z Indians. "
-                f"The user has a **{request.riskProfile}** risk profile. "
-                f"Portfolio: Invested ₹{portfolio_snapshot.totalInvested if portfolio_snapshot else 0:,.2f}, "
-                f"Current Value ₹{portfolio_snapshot.currentValue if portfolio_snapshot else 0:,.2f}, "
+                f"You are Gullak AI - a friendly, intelligent personal finance coach for Gen-Z Indians. "
+                f"The user has a {request.riskProfile} risk profile. "
+                f"Portfolio: Invested Rs {portfolio_snapshot.totalInvested if portfolio_snapshot else 0:,.2f}, "
+                f"Current Value Rs {portfolio_snapshot.currentValue if portfolio_snapshot else 0:,.2f}, "
                 f"Returns {portfolio_snapshot.returnPercentage if portfolio_snapshot else 0:.1f}%. "
                 f"Savings goals: {goals_text}. "
-                f"Core product: round-up micro-investing (every spend rounded up to ₹10, spare change invested in Nifty Index Funds or Digital Gold). "
+                f"Core product: round-up micro-investing (every spend rounded up to Rs 10, spare change invested in Nifty Index Funds or Digital Gold). "
                 f"Be concise (max 3-4 sentences), encouraging, use INR, avoid jargon, suggest actionable next steps. "
                 f"Use emojis sparingly. Never mention OpenAI or GPT."
             )
 
             full_prompt = f"{system_prompt}\n\nUser: {request.message}\nGullak AI:"
+            ai_text = gemini_generate(full_prompt)
 
-            response = model.generate_content(full_prompt)
-            ai_text = response.text.strip()
-
-            # Dynamic suggested actions
             actions = ["Show my portfolio"]
             msg_lower = request.message.lower()
             if "goal" in msg_lower:
@@ -200,22 +223,21 @@ async def chat_endpoint(request: ChatRequest):
             return ChatResponse(
                 success=True,
                 response=ai_text,
-                agentUsed="Gemini 1.5 Flash",
+                agentUsed=f"Gemini ({GEMINI_MODEL})",
                 suggestedActions=actions
             )
 
         except Exception as e:
-            print(f"[Gemini] Chat error: {e}")
-            # Fallback to rule-based
+            print(f"[Gemini] Chat error: {e}", flush=True)
             fallback = get_rule_based_response(request.message, request.riskProfile, request.portfolio, request.goals)
             return ChatResponse(
                 success=True,
                 response=fallback["response"],
-                agentUsed=f"Rule-Based Agent (Gemini failover: {str(e)[:60]})",
+                agentUsed=f"Rule-Based Agent (Gemini failover)",
                 suggestedActions=fallback["suggestedActions"]
             )
 
-    # No API key — use rule-based
+    # No Gemini - use rule-based
     fallback = get_rule_based_response(request.message, request.riskProfile, request.portfolio, request.goals)
     return ChatResponse(
         success=True,
@@ -246,22 +268,19 @@ async def spending_analysis(request: SpendingAnalysisRequest):
     top_category = max(category_totals, key=category_totals.get) if category_totals else None
     top_merchant_amount = merchant_totals.get(top_merchant, 0) if top_merchant else 0
 
-    model = get_gemini_model()
-
-    if model:
+    if is_gemini_ready():
         try:
             prompt = (
-                f"A user spent ₹{total_spent:.0f} across {len(request.transactions)} transactions this month. "
-                f"Top merchant: {top_merchant} (₹{top_merchant_amount:.0f}). "
+                f"A user spent Rs {total_spent:.0f} across {len(request.transactions)} transactions this month. "
+                f"Top merchant: {top_merchant} (Rs {top_merchant_amount:.0f}). "
                 f"Top category: {top_category}. "
                 f"Risk profile: {request.riskProfile}. "
                 f"In 2 short sentences max: give one specific saving tip and one encouraging micro-investment insight. "
-                f"Use ₹ currency. Be friendly and Gen-Z appropriate."
+                f"Use Rs currency. Be friendly and Gen-Z appropriate."
             )
-            response = model.generate_content(prompt)
-            insight_text = response.text.strip()
+            insight_text = gemini_generate(prompt, max_tokens=200)
         except Exception as e:
-            insight_text = f"You spent ₹{total_spent:.0f} this month. Your biggest expense was {top_merchant} — try cutting 10% there and that's ₹{top_merchant_amount*0.1:.0f} more for your investment vault! 💡"
+            insight_text = f"You spent Rs {total_spent:.0f} this month. Your biggest expense was {top_merchant} - try cutting 10% there to boost your investment vault!"
     else:
         insight_text = f"You spent ₹{total_spent:.0f} this month. Your top merchant is {top_merchant or 'unknown'} — small cuts there could add ₹{max(top_merchant_amount*0.1, 50):.0f}/month to your savings! 💡"
 
@@ -282,12 +301,12 @@ async def spending_analysis(request: SpendingAnalysisRequest):
 # ---------------------------------------------------------------------------
 @app.get("/")
 def read_root():
-    api_key = os.getenv("GEMINI_API_KEY")
     return {
         "status": "online",
         "service": "Gullak Agentic AI Server",
-        "engine": "FastAPI + Google Gemini 1.5 Flash",
-        "geminiConfigured": bool(api_key),
+        "engine": f"FastAPI + {GEMINI_MODEL or 'Rule-Based'}",
+        "geminiConfigured": bool(os.getenv("GEMINI_API_KEY")),
+        "geminiModel": GEMINI_MODEL,
     }
 
 if __name__ == "__main__":
